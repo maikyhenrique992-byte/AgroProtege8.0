@@ -1,0 +1,2528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caderneta Agro - Modo Campo</title>
+    
+      <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDSG3ECCMTDkKKZRSjsfbDwVvUkwuBX_-U",
+        authDomain: "agroprotege-98b38.firebaseapp.com",
+        projectId: "agroprotege-98b38",
+        storageBucket: "agroprotege-98b38.firebasestorage.app",
+        messagingSenderId: "103779130697",
+        appId: "1:103779130697:web:a8475190123e63a51e4e98"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      window.db = db;
+      window.firebaseDoc = doc;
+      window.firebaseSetDoc = setDoc;
+      window.firebaseGetDoc = getDoc;
+    </script>
+
+   <style>
+        :root {
+            --primary: #047857; 
+            --primary-dark: #065f46;
+            --primary-light: #ecfdf5;
+            --accent: #047857;
+            --danger: #dc2626;
+            --danger-bg: #ffeeee;
+            --warning: #d97706;
+            --bg: #f1f5f9; 
+            --card-bg: #ffffff;
+            --card-border: #cbd5e1;
+            --text: #020617; 
+            --text-muted: #334155; 
+            --border: #94a3b8; 
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 20px 12px; max-width: 680px; margin: 0 auto; -webkit-tap-highlight-color: transparent; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-md);
+            padding: 24px 20px;
+            box-shadow: var(--shadow-card);
+            border: 2px solid var(--card-border);
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .hidden { display: none !important; }
+
+        h2 { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; margin-bottom: 6px; }
+        p.subheading { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4; }
+
+        .btn {
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+            margin-top: 14px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background-color: var(--primary-dark); }
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-secondary { background-color: #e2e8f0; color: #0f172a; border: 2px solid var(--border); box-shadow: none; }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+        
+        .btn-outline { background: #ffffff; border: 2px solid var(--primary); color: var(--primary); box-shadow: none; }
+        .btn-outline:hover { background: var(--primary-light); }
+        
+        .btn-danger { background-color: #fee2e2; color: var(--danger); border: 2px solid #f87171; box-shadow: none; }
+        .btn-danger:hover { background-color: var(--danger); color: white; }
+        
+        .btn-whatsapp { background-color: #065f46; color: #ffffff; box-shadow: 0 4px 12px rgba(6, 95, 70, 0.3); }
+        .btn-whatsapp:hover { background-color: #047857; }
+        
+        .btn-warning { background-color: #b45309; color: white; }
+        .btn-warning:hover { background-color: #92400e; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 12px; }
+        .menu-card-opcao {
+            background: #ffffff; border: 2px solid var(--border); padding: 18px; border-radius: var(--radius-sm);
+            cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;
+        }
+        .menu-card-opcao:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
+        .menu-info h3 { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+        .menu-info p { font-size: 13px; font-weight: 600; color: var(--text-muted); line-height: 1.4; }
+        .menu-arrow {
+            width: 38px; height: 38px; background: #e2e8f0; border: 2px solid var(--border); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; color: var(--text); font-weight: bold; font-size: 16px;
+        }
+        .menu-card-opcao:hover .menu-arrow { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+        .status-btn {
+            padding: 16px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: #ffffff;
+            font-weight: 700; font-size: 16px; cursor: pointer; text-align: center; color: var(--text-muted);
+        }
+        .status-btn.saudavel.ativo { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+        .status-btn.doenca.ativo { border-color: var(--danger); background: var(--danger-bg); color: var(--danger); }
+
+        label { font-size: 12px; font-weight: 800; color: var(--text); margin-top: 16px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select, textarea {
+            width: 100%; padding: 16px; margin-top: 6px; border: 2px solid var(--border); border-radius: var(--radius-sm);
+            font-size: 16px; font-weight: 600; background: #ffffff; color: var(--text);
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(4, 120, 87, 0.2); }
+
+        .doenca-item { background: #f8fafc; border: 2px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-top: 12px; }
+        .doenca-checkbox-label { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 700; color: var(--text); cursor: pointer; }
+        .doenca-checkbox-label input[type="checkbox"] { width: 24px; height: 24px; accent-color: var(--primary); cursor: pointer; }
+        .doenca-detalhes { margin-top: 12px; padding-top: 12px; border-top: 2px dashed var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .talhao-card, .estoque-card, .pedido-card {
+            background: #ffffff; border: 2px solid var(--border); padding: 16px 18px; border-radius: var(--radius-sm);
+            margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .talhao-card:hover, .estoque-card:hover, .pedido-card:hover { border-color: var(--primary); }
+        .talhao-info, .estoque-info, .pedido-info { display: flex; flex-direction: column; gap: 4px; }
+        .talhao-info strong { font-size: 17px; font-weight: 800; color: var(--text); }
+        .talhao-detalhes-tag { font-size: 14px; font-weight: 600; color: var(--text-muted); line-height: 1.5; }
+
+        .historico-card {
+            background: #ffffff; border: 2px solid var(--border); border-left: 6px solid var(--primary); padding: 16px;
+            border-radius: var(--radius-sm); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+        }
+        .historico-card:hover { border-color: var(--primary); background: #f8fafc; }
+        
+        .btn-excluir-visita {
+            background: var(--danger-bg); color: var(--danger); border: 2px solid #f87171;
+            padding: 10px 14px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 700;
+        }
+        .btn-excluir-visita:hover { background: var(--danger); color: white; }
+
+        .filtros-container { background: #e2e8f0; border: 2px solid var(--border); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 16px; }
+        .filtros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .metric-card-area {
+            background: var(--primary-light); border: 2px solid var(--primary); border-radius: var(--radius-sm);
+            padding: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .metric-card-area span { font-size: 14px; font-weight: 700; color: var(--primary-dark); }
+        .metric-card-area strong { font-size: 20px; font-weight: 800; color: var(--text); }
+
+        .table-wrapper { overflow-x: auto; margin-top: 12px; border-radius: var(--radius-sm); border: 2px solid var(--border); }
+        .resumo-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; background: #ffffff; }
+        .resumo-table th { background: #cbd5e1; color: var(--text); padding: 14px; font-weight: 800; border-bottom: 2px solid var(--border); white-space: nowrap; }
+        .resumo-table td { padding: 14px; border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; color: var(--text-muted); }
+        .badge-zero { color: #64748b; font-weight: 600; }
+        .badge-alerta { color: var(--danger); font-weight: 800; }
+
+        #mapa, #mapa-detalhe-visita { height: 260px; width: 100%; border-radius: var(--radius-sm); margin-top: 16px; border: 2px solid var(--border); z-index: 1; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+    <!-- TELA DE LOGIN / CADASTRO INICIAL -->
+    <div id="tela-login" class="card">
+        <h2 id="titulo-login-card">🔒 Entrar no Caderneta Agro</h2>
+        <p class="subheading" id="subtitulo-login-card">Digite seu usuário e senha para acessar o sistema</p>
+
+        <label>Usuário</label>
+        <input type="text" id="login-usuario" placeholder="Ex: admin">
+
+        <label>Senha</label>
+        <input type="password" id="login-senha" placeholder="Ex: 1234">
+
+        <button onclick="fazerLogin()" id="btn-acao-login" class="btn" style="margin-top: 24px;">Entrar</button>
+        <button onclick="abrirTelaEsqueciSenha()" class="btn btn-secondary" style="margin-top: 10px;">Esqueci minha senha</button>
+    </div>
+
+    <!-- TELA DE REDEFINIÇÃO DE SENHA -->
+    <div id="tela-esqueci-senha" class="card hidden">
+        <h2>🔑 Redefinir Senha</h2>
+        <p class="subheading">Insira a palavra-chave de segurança e defina uma nova senha</p>
+
+        <label>Palavra-Chave de Segurança *</label>
+        <input type="text" id="recup-palavra" placeholder="Digite a palavra-chave">
+
+        <label>Nova Senha *</label>
+        <input type="password" id="recup-nova-senha" placeholder="Digite a nova senha">
+
+        <button onclick="salvarNovaSenha()" class="btn" style="margin-top: 20px;">Redefinir Senha</button>
+        <button onclick="voltarParaLogin()" class="btn btn-secondary">Cancelar</button>
+    </div>
+
+    <!-- TELA 0: TELA DE INÍCIO / MENU PRINCIPAL -->
+    <div id="tela-inicio" class="card hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h2>Caderneta Agro</h2>
+            <button onclick="sairDoApp()" class="btn btn-secondary" style="width: auto; padding: 8px 14px; margin-top: 0; font-size: 13px;">Sair</button>
+        </div>
+        <p class="subheading">Selecione o módulo que deseja acessar</p>
+
+        <div class="menu-grid">
+            <div class="menu-card-opcao" onclick="mostrarTela('tela-talhoes')">
+                <div class="menu-info">
+                    <h3>🌱 Módulo MIP (Talhões e Vistorias)</h3>
+                    <p>Gerenciamento de áreas e monitoramento</p>
+                </div>
+                <div class="menu-arrow">➔</div>
+            </div>
+
+            <div class="menu-card-opcao" onclick="abrirTelaOperacoes()">
+                <div class="menu-info">
+                    <h3>🚜 Módulo de Operações</h3>
+                    <p>Atividades, talhões e insumos por campo</p>
+                </div>
+                <div class="menu-arrow">➔</div>
+            </div>
+
+            <div class="menu-card-opcao" onclick="abrirTelaHistoricoAplicacoes()">
+                <div class="menu-info">
+                    <h3>📊 Relatório de Aplicações</h3>
+                    <p>Hectares totais, concluídos e restantes</p>
+                </div>
+                <div class="menu-arrow">➔</div>
+            </div>
+
+            <div class="menu-card-opcao" onclick="abrirTelaEstoque()">
+                <div class="menu-info">
+                    <h3>📦 Módulo de Estoque</h3>
+                    <p>Insumos, saídas e saldos atualizados</p>
+                </div>
+                <div class="menu-arrow">➔</div>
+            </div>
+
+            <div class="menu-card-opcao" onclick="abrirTelaHistoricoEstoque()">
+                <div class="menu-info">
+                    <h3>📋 Histórico de Saídas</h3>
+                    <p>Auditoria completa de aplicações</p>
+                </div>
+                <div class="menu-arrow">➔</div>
+            </div>
+
+            <div class="menu-card-opcao" onclick="abrirTelaPedidos()">
+                <div class="menu-info">
+                    <h3>🛒 Pedidos e Entregas</h3>
+                    <p>Fornecedores, produtos e saldos</p>
+                </div>
+                <div class="menu-arrow">➔</div>
+            </div>
+        </div>
+
+        <button onclick="atualizarDadosDaNuvem()" class="btn btn-outline" style="margin-top: 18px;">🔄 Sincronizar Nuvem</button>
+    </div>
+
+    <!-- TELA: RELATÓRIO E HISTÓRICO DE APLICAÇÕES -->
+    <div id="tela-historico-aplicacoes" class="card hidden">
+        <button onclick="mostrarTela('tela-inicio')" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Menu Principal</button>
+        
+        <h2>Relatório de Aplicações</h2>
+        <p class="subheading">Acompanhe andamento de hectares e gráficos</p>
+
+        <div class="filtros-container" style="margin-bottom: 12px;">
+            <label style="margin-top: 0;">Filtrar Operação</label>
+            <select id="filtro-operacao-relatorio" onchange="renderizarRelatorioAplicacoes()">
+                <option value="todas">Todas as Operações</option>
+            </select>
+        </div>
+
+        <button onclick="compartilharRelatorioAplicacoesWhatsApp()" class="btn btn-whatsapp" style="margin-bottom: 16px;">💬 Compartilhar via WhatsApp</button>
+
+        <div id="lista-relatorio-aplicacoes" style="margin-top: 8px;"></div>
+    </div>
+
+    <!-- TELA: LISTA DE OPERAÇÕES -->
+    <div id="tela-operacoes" class="card hidden">
+        <button onclick="mostrarTela('tela-inicio')" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Menu Principal</button>
+        
+        <h2>Controle de Operações</h2>
+        <p class="subheading">Gerencie as operações e acesse detalhes</p>
+
+        <button onclick="prepararNovaOperacao()" class="btn" style="margin-bottom: 16px;">➕ Nova Operação</button>
+
+        <label style="margin-top: 10px;">Histórico</label>
+        <div id="lista-operacoes" style="margin-top: 8px;"></div>
+    </div>
+
+    <!-- TELA: NOVA OPERAÇÃO -->
+    <div id="tela-nova-operacao" class="card hidden">
+        <h2>Nova Operação</h2>
+        <p class="subheading">Selecione talhões e período</p>
+
+        <label>Nome da Operação *</label>
+        <input type="text" id="operacao-nome" placeholder="Ex: Adubação de Cobertura">
+
+        <label>Selecione os Talhões *</label>
+        <div id="container-selecao-talhoes" style="max-height: 200px; overflow-y: auto; border: 2px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-top: 8px; background: #ffffff;"></div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+            <div>
+                <label>Data Início *</label>
+                <input type="date" id="operacao-data-inicio">
+            </div>
+            <div>
+                <label>Data Fim (Opcional)</label>
+                <input type="date" id="operacao-data-fim">
+            </div>
+        </div>
+
+        <button onclick="salvarNovaOperacao()" class="btn" style="margin-top: 20px;">Criar Operação</button>
+        <button onclick="abrirTelaOperacoes()" class="btn btn-secondary">Cancelar</button>
+    </div>
+
+    <!-- TELA: DETALHES DA OPERAÇÃO -->
+    <div id="tela-detalhes-operacao" class="card hidden">
+        <button onclick="abrirTelaOperacoes()" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Voltar</button>
+        
+        <h2 id="detalhe-op-titulo">Operação</h2>
+        <p class="subheading" id="detalhe-op-sub">Gerencie a execução por talhão</p>
+
+        <button onclick="marcarOperacaoComoFinalizada()" class="btn btn-whatsapp" style="margin-bottom: 16px;">✅ Concluir Operação (Hoje)</button>
+
+        <label style="margin-top: 10px;">Talhões Vinculados</label>
+        <div id="lista-talhoes-operacao" style="margin-top: 8px;"></div>
+    </div>
+
+    <!-- TELA: EDIÇÃO INDIVIDUAL DO TALHÃO -->
+    <div id="tela-edicao-talhao-operacao" class="card hidden">
+        <button onclick="voltarParaDetalhesOperacao()" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Voltar</button>
+        
+        <h2 id="edit-talhao-op-titulo">Talhão</h2>
+        <p class="subheading">Operador, datas e produtos aplicados</p>
+
+        <input type="hidden" id="edit-op-talhao-nome" value="">
+
+        <label>Operador *</label>
+        <input type="text" id="talhao-op-operador" placeholder="Ex: João da Silva">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+                <label>Data Início *</label>
+                <input type="date" id="talhao-op-data-inicio">
+            </div>
+            <div>
+                <label>Data Fim *</label>
+                <input type="date" id="talhao-op-data-fim">
+            </div>
+        </div>
+
+        <label>Hectares Feitos Hoje *</label>
+        <input type="number" step="0.1" id="talhao-op-ha-hoje" placeholder="Ex: 5.0" oninput="calcularTotalProdutosGastos()">
+
+        <div style="background: #e2e8f0; padding: 14px; border-radius: var(--radius-sm); margin-top: 14px; font-size: 15px; font-weight: 700;">
+            📐 Área Total: <strong id="lbl-ha-talhao-total">0.0</strong> ha<br>
+            📐 Feito Anterior: <strong id="lbl-ha-anterior">0.0</strong> ha<br>
+            🚀 Novo Acumulado: <span id="lbl-ha-acumulado" style="color: var(--primary);">0.0</span> ha
+        </div>
+
+        <button type="button" onclick="marcarTalhaoComoConcluidoTotal()" class="btn btn-outline" style="margin-top: 14px; font-size: 14px;">✅ Concluir 100% da Área</button>
+
+        <label style="margin-top: 16px;">Produtos Utilizados e Dose/ha *</label>
+        <div id="container-produtos-operacao" style="margin-top: 8px;"></div>
+        <button onclick="adicionarLinhaProdutoOperacao()" class="btn btn-outline" style="margin-top: 8px; font-size: 14px;">➕ Adicionar Produto</button>
+
+        <label style="margin-top: 18px;">Total Gasto (Baixa no Estoque)</label>
+        <div id="resumo-total-gasto-produtos" style="background: #ffffff; border: 2px solid var(--border); padding: 14px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; color: var(--text-muted); margin-top: 6px;">
+            Insira os dados acima.
+        </div>
+
+        <button onclick="salvarEdicaoTalhaoOperacao()" class="btn" style="margin-top: 20px;">💾 Salvar e Dar Baixa</button>
+    </div>
+
+    <!-- TELA 1: LISTA DE TALHÕES (MIP) -->
+    <div id="tela-talhoes" class="card hidden">
+        <button onclick="mostrarTela('tela-inicio')" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Menu Principal</button>
+        
+        <h2>MIP - Meus Talhões</h2>
+        <p class="subheading">Áreas e vistorias fitossanitárias</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+            <button onclick="mostrarTela('tela-novo-talhao')" class="btn" style="margin-top: 0;">➕ Novo Talhão</button>
+            <button onclick="abrirResumoGeral()" class="btn btn-outline" style="margin-top: 0;">📊 Resumo Geral</button>
+        </div>
+        
+        <div id="lista-talhoes"></div>
+    </div>
+
+    <!-- TELA: ESTOQUE DE INSUMOS -->
+    <div id="tela-estoque" class="card hidden">
+        <button onclick="mostrarTela('tela-inicio')" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Menu Principal</button>
+        
+        <h2>Controle de Estoque</h2>
+        <p class="subheading">Defensivos, fertilizantes e saídas</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+            <button onclick="mostrarTela('tela-novo-item-estoque')" class="btn" style="margin-top: 0;">➕ Adicionar</button>
+            <button onclick="abrirTelaSaidaEstoque()" class="btn btn-outline" style="margin-top: 0;">📤 Registrar Saída</button>
+        </div>
+
+        <div class="filtros-container" style="margin-bottom: 12px;">
+            <label style="margin-top: 0;">Filtrar Categoria</label>
+            <select id="filtro-classe-estoque" onchange="renderizarListaEstoque()">
+                <option value="todos">Todas as Classes</option>
+                <option value="Fungicida">Fungicida</option>
+                <option value="Inseticida">Inseticida</option>
+                <option value="Herbicida">Herbicida</option>
+                <option value="Fertilizante">Fertilizante</option>
+                <option value="Foliar">Foliar</option>
+                <option value="Sementes">Sementes</option>
+                <option value="Adjuvantes">Adjuvantes</option>
+                <option value="Outros">Outros</option>
+            </select>
+        </div>
+
+        <button onclick="compartilharResumoEstoque()" class="btn btn-whatsapp" style="margin-bottom: 12px;">💬 Compartilhar Estoque</button>
+
+        <label style="margin-top: 10px;">Saldo Atual</label>
+        <div id="lista-estoque" style="margin-top: 8px;"></div>
+    </div>
+
+    <!-- TELA: HISTÓRICO DE SAÍDAS DO ESTOQUE -->
+    <div id="tela-historico-estoque" class="card hidden">
+        <button onclick="mostrarTela('tela-inicio')" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Menu Principal</button>
+        
+        <h2>Histórico de Saídas</h2>
+        <p class="subheading">Auditoria de aplicações realizadas</p>
+
+        <div id="lista-historico-saidas-completo" style="margin-top: 12px;"></div>
+    </div>
+
+    <!-- TELA: PEDIDOS E ENTREGAS DE PRODUTOS -->
+    <div id="tela-pedidos" class="card hidden">
+        <button onclick="mostrarTela('tela-inicio')" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Menu Principal</button>
+        
+        <h2>Pedidos e Entregas</h2>
+        <p class="subheading">Gerencie pedidos por fornecedor</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <button onclick="prepararNovoPedido()" class="btn" style="margin-top: 0;">➕ Novo Pedido</button>
+            <button onclick="compartilharResumoPedidos()" class="btn btn-whatsapp" style="margin-top: 0;">💬 Compartilhar Wpp</button>
+        </div>
+
+        <div class="filtros-container" style="margin-bottom: 12px;">
+            <label style="margin-top: 0;">Filtrar Status</label>
+            <select id="filtro-status-pedido" onchange="renderizarListaPedidos()">
+                <option value="todos">Todos os Pedidos</option>
+                <option value="pendentes">Com Pendência</option>
+                <option value="concluidos">Totalmente Entregues</option>
+            </select>
+        </div>
+
+        <label style="margin-top: 10px;">Lista</label>
+        <div id="lista-pedidos" style="margin-top: 8px;"></div>
+    </div>
+
+    <!-- TELA: NOVO PEDIDO -->
+    <div id="tela-novo-pedido" class="card hidden">
+        <h2>Novo Pedido</h2>
+        <p class="subheading">Informe a empresa fornecedora e os produtos</p>
+
+        <label>Empresa Fornecedora *</label>
+        <input type="text" id="pedido-empresa-titulo" placeholder="Ex: AgroComercial Ltda">
+
+        <label style="margin-top: 20px;">Produtos *</label>
+        <div id="container-itens-pedido-novo" style="margin-top: 8px;"></div>
+        <button type="button" onclick="adicionarLinhaItemPedidoNovo()" class="btn btn-outline" style="margin-top: 8px; font-size: 14px;">➕ Adicionar Outro Produto</button>
+
+        <button onclick="salvarNovoPedidoMultiplo()" class="btn" style="margin-top: 20px;">Salvar Pedido</button>
+        <button onclick="abrirTelaPedidos()" class="btn btn-secondary">Cancelar</button>
+    </div>
+
+    <!-- TELA: REGISTRAR ENTREGA -->
+    <div id="tela-registrar-entrega" class="card hidden">
+        <h2>Registrar Entrega</h2>
+        <p class="subheading" id="subtitulo-registrar-entrega">Atualize quantidade entregue e adicione ao estoque</p>
+
+        <label>Selecione o Produto *</label>
+        <select id="entrega-produto-select"></select>
+
+        <label>Categoria no Estoque *</label>
+        <select id="entrega-categoria">
+            <option value="Fungicida">Fungicida</option>
+            <option value="Inseticida">Inseticida</option>
+            <option value="Herbicida">Herbicida</option>
+            <option value="Fertilizante">Fertilizante</option>
+            <option value="Foliar">Foliar</option>
+            <option value="Sementes">Sementes</option>
+            <option value="Adjuvantes">Adjuvantes</option>
+            <option value="Outros">Outros</option>
+        </select>
+
+        <label>Quantidade Entregue *</label>
+        <input type="number" step="0.1" id="entrega-qtd-adicionar" placeholder="Ex: 20">
+
+        <label>Cultura de Destino *</label>
+        <select id="entrega-cultura">
+            <option value="Café">Café</option>
+            <option value="Soja">Soja</option>
+            <option value="Milho">Milho</option>
+            <option value="Cana">Cana</option>
+            <option value="Pastagem">Pastagem</option>
+            <option value="Geral">Geral</option>
+        </select>
+
+        <label>Observações</label>
+        <textarea id="entrega-obs" rows="2" placeholder="Ex: Nota fiscal nº 1234"></textarea>
+
+        <button onclick="salvarEntregaPedido()" class="btn">Confirmar Entrega</button>
+        <button onclick="abrirTelaPedidos()" class="btn btn-secondary">Cancelar</button>
+    </div>
+
+    <!-- TELA: NOVO ITEM NO ESTOQUE -->
+    <div id="tela-novo-item-estoque" class="card hidden">
+        <h2>Novo Produto no Estoque</h2>
+        <p class="subheading">Cadastre insumo e quantidade inicial</p>
+
+        <label>Nome do Produto *</label>
+        <input type="text" id="estoque-nome" placeholder="Ex: NPK 20-05-20">
+
+        <label>Categoria *</label>
+        <select id="estoque-categoria">
+            <option value="Fungicida">Fungicida</option>
+            <option value="Inseticida">Inseticida</option>
+            <option value="Herbicida">Herbicida</option>
+            <option value="Fertilizante">Fertilizante</option>
+            <option value="Foliar">Foliar</option>
+            <option value="Sementes">Sementes</option>
+            <option value="Adjuvantes">Adjuvantes</option>
+            <option value="Outros">Outros</option>
+        </select>
+
+        <label>Valor Unitário (R$) *</label>
+        <input type="number" step="0.01" id="estoque-valor" placeholder="Ex: 150.00">
+
+        <label>Quantidade Atual *</label>
+        <input type="number" step="0.1" id="estoque-qtd" placeholder="Ex: 50">
+
+        <label>Unidade *</label>
+        <select id="estoque-unidade">
+            <option value="Litros (L)">Litros (L)</option>
+            <option value="Quilos (kg)">Quilos (kg)</option>
+            <option value="Sacas">Sacas</option>
+            <option value="Unidades">Unidades</option>
+        </select>
+
+        <button onclick="salvarNovoItemEstoque()" class="btn">Salvar Produto</button>
+        <button onclick="abrirTelaEstoque()" class="btn btn-secondary">Cancelar</button>
+    </div>
+
+    <!-- TELA: REGISTRAR SAÍDA DE ESTOQUE -->
+    <div id="tela-saida-estoque" class="card hidden">
+        <h2>Saída de Estoque</h2>
+        <p class="subheading">Baixa automática por talhão</p>
+
+        <label>Produto *</label>
+        <select id="saida-produto-id"></select>
+
+        <label>Quantidade *</label>
+        <input type="number" step="0.1" id="saida-qtd" placeholder="Ex: 5">
+
+        <label>Cultura *</label>
+        <select id="saida-cultura">
+            <option value="Café">Café</option>
+            <option value="Soja">Soja</option>
+            <option value="Milho">Milho</option>
+            <option value="Cana">Cana</option>
+            <option value="Pastagem">Pastagem</option>
+        </select>
+
+        <label>Talhão *</label>
+        <select id="saida-talhao-id"></select>
+
+        <button onclick="salvarSaidaEstoque()" class="btn">Confirmar Baixa</button>
+        <button onclick="abrirTelaEstoque()" class="btn btn-secondary">Cancelar</button>
+    </div>
+
+    <!-- TELA: RESUMO GERAL COM FILTROS -->
+    <div id="tela-resumo-geral" class="card hidden">
+        <button onclick="mostrarTela('tela-talhoes')" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Voltar</button>
+        
+        <h2>Resumo Geral MIP</h2>
+        <p class="subheading">Índices consolidados por talhão e ocorrência</p>
+
+        <div class="filtros-container">
+            <div class="filtros-grid">
+                <div>
+                    <label style="margin-top: 0;">Talhão</label>
+                    <select id="filtro-talhao" onchange="aplicarFiltrosResumo()">
+                        <option value="todos">Todos os Talhões</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="margin-top: 0;">Ocorrência</label>
+                    <select id="filtro-doenca" onchange="aplicarFiltrosResumo()">
+                        <option value="todas">Todas as Ocorrências</option>
+                        <option value="Ferrugem (Ativa)">Ferrugem (Ativa)</option>
+                        <option value="Ferrugem (Curando)">Ferrugem (Curando)</option>
+                        <option value="Ferrugem (Curada)">Ferrugem (Curada)</option>
+                        <option value="Bicho Mineiro (Larva)">Bicho Mineiro (Larva)</option>
+                        <option value="Bicho Mineiro (Pupa)">Bicho Mineiro (Pupa)</option>
+                        <option value="Bicho Mineiro (Mariposa)">Bicho Mineiro (Mariposa)</option>
+                        <option value="Cercospora">Cercospora</option>
+                        <option value="Mancha Aureolada">Mancha Aureolada</option>
+                        <option value="Ácaro Vermelho">Ácaro Vermelho</option>
+                        <option value="Ácaro Leprose">Ácaro Leprose</option>
+                        <option value="Pulgão">Pulgão</option>
+                        <option value="Ascochita">Ascochita</option>
+                        <option value="Cochonilha">Cochonilha</option>
+                        <option value="Crisopídeo">Crisopídeo</option>
+                        <option value="Pseudomonas">Pseudomonas</option>
+                        <option value="Phoma">Phoma</option>
+                        <option value="Antracnose">Antracnose</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filtros-grid" style="margin-top: 12px;">
+                <div>
+                    <label style="margin-top: 0;">Data Inicial</label>
+                    <input type="date" id="filtro-data-inicio" onchange="aplicarFiltrosResumo()">
+                </div>
+                <div>
+                    <label style="margin-top: 0;">Data Final</label>
+                    <input type="date" id="filtro-data-fim" onchange="aplicarFiltrosResumo()">
+                </div>
+            </div>
+
+            <div style="margin-top: 12px;">
+                <label style="margin-top: 0;">Porcentagem Mínima</label>
+                <select id="filtro-porcentagem" onchange="aplicarFiltrosResumo()">
+                    <option value="0">Todas (> 0%)</option>
+                    <option value="3">>= 3%</option>
+                    <option value="5">>= 5%</option>
+                    <option value="10">>= 10%</option>
+                    <option value="20">>= 20%</option>
+                </select>
+            </div>
+
+            <button onclick="limparFiltrosResumo()" class="btn btn-secondary" style="margin-top: 14px; font-size: 14px;">Limpar Filtros</button>
+        </div>
+
+        <div class="metric-card-area">
+            <span>📐 Área Filtrada:</span>
+            <strong id="total-area-filtrada">0.0 ha</strong>
+        </div>
+
+        <button onclick="compartilharResumoMIPWhatsApp()" class="btn btn-whatsapp" style="margin-bottom: 14px;">
+            💬 Compartilhar Resumo via WhatsApp
+        </button>
+
+        <div class="table-wrapper">
+            <table class="resumo-table">
+                <thead id="cabecalho-tabela-resumo"></thead>
+                <tbody id="corpo-tabela-resumo"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TELA: NOVO TALHÃO -->
+    <div id="tela-novo-talhao" class="card hidden">
+        <h2>Novo Talhão</h2>
+        <p class="subheading">Informe os dados básicos</p>
+
+        <label>Nome do Talhão *</label>
+        <input type="text" id="novo-talhao-nome" placeholder="Ex: Talhão 03">
+
+        <label>Variedade / Cultura *</label>
+        <input type="text" id="novo-talhao-variedade" placeholder="Ex: Catuaí Vermelho">
+
+        <label>Área (Hectares) *</label>
+        <input type="number" step="0.1" id="novo-talhao-area" placeholder="Ex: 5.5">
+
+        <button onclick="salvarNovoTalhao()" class="btn">Salvar Talhão</button>
+        <button onclick="mostrarTela('tela-talhoes')" class="btn btn-secondary">Cancelar</button>
+    </div>
+
+    <!-- TELA 2: DETALHES E HISTÓRICO -->
+    <div id="tela-detalhes" class="card hidden">
+        <button onclick="mostrarTela('tela-talhoes')" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Voltar</button>
+        
+        <h2 id="titulo-talhao">Talhão</h2>
+        <p class="subheading" id="subtitulo-talhao">Carregando...</p>
+
+        <div id="container-botao-continuar-rascunho"></div>
+        <button onclick="iniciarNovaAvaliacao()" class="btn">📋 Nova Avaliação</button>
+        
+        <label style="margin-top: 24px;">Visitas Anteriores</label>
+        <div id="historico-visitas" style="margin-top: 8px;"></div>
+
+        <button onclick="excluirTalhaoAtual()" class="btn btn-danger" style="margin-top: 24px;">🗑️ Excluir Talhão</button>
+    </div>
+
+    <!-- TELA: DETALHES DE UMA VISITA -->
+    <div id="tela-detalhe-visita" class="card hidden">
+        <button onclick="voltarParaTalhaoDetalhes()" class="btn btn-secondary" style="width: auto; padding: 10px 16px; margin-bottom: 16px;">← Voltar</button>
+        
+        <h2 id="detalhe-visita-titulo">Detalhes da Visita</h2>
+        <p class="subheading" id="detalhe-visita-subtitulo">Informações e mapa</p>
+
+        <div id="detalhe-visita-estatisticas"></div>
+        <div id="mapa-detalhe-visita"></div>
+
+        <label style="margin-top: 20px;">Plantas Vistoriadas</label>
+        <div id="lista-plantas-visita" style="margin-top: 8px;"></div>
+    </div>
+
+    <!-- TELA 3: METAS DA VISTORIA -->
+    <div id="tela-config-avaliacao" class="card hidden">
+        <h2>Configurar Vistoria</h2>
+        <p class="subheading">Defina a amostragem</p>
+
+        <label>Quantidade de Plantas</label>
+        <input type="number" id="qtd-plantas-meta" value="10" min="1">
+
+        <button onclick="comecarVistoria()" class="btn">Iniciar Vistoria</button>
+        <button onclick="mostrarTela('tela-detalhes')" class="btn btn-secondary">Cancelar</button>
+    </div>
+
+    <!-- TELA 4: AVALIAÇÃO PLANTA A PLANTA -->
+    <div id="tela-vistoria" class="card hidden">
+        <h2 id="progresso-planta">Planta 1 de 10</h2>
+        <p class="subheading">Situação individual</p>
+
+        <label>Estado Geral</label>
+        <div class="status-grid">
+            <div id="btn-saudavel" class="status-btn saudavel ativo" onclick="selecionarStatus('saudavel')">✅ Saudável</div>
+            <div id="btn-doenca" class="status-btn doenca" onclick="selecionarStatus('doenca')">🦠 Afetada</div>
+        </div>
+
+        <div id="secao-doenca" class="hidden">
+            <label>Selecione a(s) Ocorrência(s)</label>
+            <div id="container-lista-doencas"></div>
+        </div>
+
+        <button onclick="capturarGps()" class="btn btn-outline">📍 Capturar GPS</button>
+        <p id="status-gps" style="font-size: 14px; font-weight: 700; color: var(--text); text-align: center; margin-top: 8px;"></p>
+
+        <label>📸 Foto</label>
+        <input type="file" accept="image/*" id="input-foto">
+
+        <label>Observação</label>
+        <textarea id="input-obs" rows="2" placeholder="Ex: Incidência no terço superior"></textarea>
+
+        <button onclick="salvarPlantaEAvancar()" class="btn">Próxima Planta →</button>
+        <button onclick="salvarRascunhoMIP()" class="btn btn-warning">💾 Salvar Rascunho</button>
+    </div>
+
+    <!-- TELA 5: RESULTADO DO TALHÃO -->
+    <div id="tela-resultado" class="card hidden">
+        <h2>Resultado da Vistoria</h2>
+        <p class="subheading">Diagnóstico da área</p>
+
+        <div id="resumo-estatisticas"></div>
+        
+        <canvas id="grafico-resultado" style="max-height: 220px; margin-top: 15px;"></canvas>
+        <div id="mapa"></div>
+
+        <button onclick="finalizarESalvarVisita()" class="btn">Concluir e Salvar</button>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        let dadosApp = JSON.parse(localStorage.getItem('dadosManejo')) || {
+            talhoes: [
+                { id: 1, nome: "Talhão 01", variedade: "Mundo Novo", area: 4.90 },
+                { id: 2, nome: "Talhão 02", variedade: "Mundo Novo", area: 4.01 },
+                { id: 3, nome: "Talhão 03", variedade: "Mundo Novo", area: 10.52 },
+                { id: 4, nome: "Talhão 04", variedade: "Mundo Novo/Bourbom", area: 36.83 },
+                { id: 5, nome: "Talhão 05", variedade: "Mundo Novo/Bourbom", area: 24.53 },
+                { id: 6, nome: "Talhão 06", variedade: "", area: 0.74 },
+                { id: 7, nome: "Talhão 07", variedade: "Catucai 24/137", area: 32.75 },
+                { id: 8, nome: "Talhão 08", variedade: "Cereais", area: 37.60 },
+                { id: 9, nome: "Talhão 09", variedade: "Catucai 2SL", area: 31.50 },
+                { id: 10, nome: "Talhão 10", variedade: "Acaia 474/19", area: 53.72 },
+                { id: 11, nome: "Talhão 11", variedade: "Arara", area: 9.30 },
+                { id: 12, nome: "Talhão 12", variedade: "", area: 20.00 },
+                { id: 14, nome: "Talhão 14", variedade: "Catucai 6/30", area: 8.00 },
+                { id: 15, nome: "Talhão 15", variedade: "Mundo Novo", area: 7.63 },
+                { id: 16, nome: "Talhão 16", variedade: "Catucai 2SL", area: 14.10 },
+                { id: 17, nome: "Talhão 17", variedade: "Arara", area: 14.13 },
+                { id: 18, nome: "Talhão 18", variedade: "Catucai 2SL", area: 6.52 },
+                { id: 19, nome: "Talhão 19", variedade: "Topazio", area: 3.72 },
+                { id: 20, nome: "Talhão 20", variedade: "Arara", area: 26.00 },
+                { id: 21, nome: "Talhão 21", variedade: "Cereais", area: 30.80 },
+                { id: 22, nome: "Talhão 22", variedade: "Cereais", area: 31.00 },
+                { id: 23, nome: "Talhão 23", variedade: "Mundo Novo", area: 18.40 },
+                { id: 24, nome: "Talhão 24", variedade: "Catucai 2SL", area: 19.52 },
+                { id: 25, nome: "Talhão 25", variedade: "Obatã Amarelo", area: 13.20 },
+                { id: 26, nome: "Talhão 26", variedade: "Acaia 474/19", area: 16.53 },
+                { id: 27, nome: "Talhão 27", variedade: "Catucai", area: 18.11 },
+                { id: 28, nome: "Talhão 28", variedade: "Acaia 474/19", area: 11.56 },
+                { id: 29, nome: "Talhão 29", variedade: "Catucai", area: 1.56 },
+                { id: 30, nome: "Talhão 30", variedade: "Burbon", area: 7.89 },
+                { id: 31, nome: "Talhão 31", variedade: "Ipr 100", area: 3.44 },
+                { id: 32, nome: "Talhão 32", variedade: "Cereais", area: 4.90 },
+                { id: 33, nome: "Talhão 33", variedade: "Ipr 100", area: 3.44 },
+                { id: 34, nome: "Talhão 34", variedade: "Palma 2", area: 15.29 },
+                { id: 34, nome: "Talhão 34R", variedade: "Palma 2", area: 18.00 },
+                { id: 35, nome: "Talhão 35", variedade: "", area: 12.00 },
+                { id: 36, nome: "Talhão 36", variedade: "Arara", area: 4.60 },
+                { id: 37, nome: "Talhão 37", variedade: "Mundo Novo", area: 3.61 },
+                { id: 38, nome: "Talhão 38", variedade: "", area: 19.30 },
+                { id: 39, nome: "Talhão 39", variedade: "Arara", area: 0.96 },
+                { id: 40, nome: "Talhão 40", variedade: "Cereais", area: 7.50 },
+                { id: 41, nome: "Talhão 41", variedade: "Mundo Novo", area: 5.90 },
+                { id: 42, nome: "Talhão 42", variedade: "Mundo Novo/Bourbom", area: 3.58 },
+                { id: 43, nome: "Talhão 43", variedade: "Mundo Novo", area: 4.27 },
+                { id: 44, nome: "Talhão 44", variedade: "Mundo Novo", area: 6.57 },
+                { id: 45, nome: "Talhão 45", variedade: "Catucai", area: 2.85 },
+                { id: 46, nome: "Cerca 08", variedade: "Mundo Novo", area: 0.74 },
+                { id: 47, nome: "Cerca10", variedade: "Mundo Novo", area: 0.43 },
+                { id: 48, nome: "Cerca 20 ao 32", variedade: "Mundo Novo", area: 0.86 },
+                { id: 49, nome: "Cerca 07 ao 20", variedade: "Mundo Novo", area: 1.00 },
+                { id: 50, nome: "Capão seco", variedade: "Catuai 62", area: 83.80 }
+            ],
+            visitas: [],
+            rascunhosMIP: {}, 
+            estoque: [
+                { id: 1, nome: "Fungicida Sistêmico", categoria: "Fungicida", valor: 120.00, quantidade: 40, unidade: "Litros (L)" },
+                { id: 2, nome: "Adubo NPK 20-05-20", categoria: "Fertilizante", valor: 95.50, quantidade: 15, unidade: "Sacas" }
+            ],
+            saidasEstoque: [],
+            pedidos: [],
+            operacoes: []
+        };
+
+        let talhaoAtualId = null;
+        let pedidoAtualId = null;
+        let operacaoAtualId = null;
+        let talhaoOperacaoEditando = null;
+        let avaliacaoAtual = { totalMeta: 0, plantas: [], plantaIndex: 1 };
+        let statusPlantaAtual = 'saudavel';
+        let gpsAtual = null;
+        let chartInstance = null;
+        let chartRelatorioInstances = {};
+        let mapInstance = null;
+        let mapDetalheVisitaInstance = null;
+
+        const camadaRuas = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' });
+        const camadaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles © Esri' });
+
+        const LISTA_OCORRENCIAS = [
+            "Ferrugem", "Bicho Mineiro", "Cercospora", "Mancha Aureolada", 
+            "Ácaro Vermelho ou Leprose", "Pulgão", "Ascochita", "Cochonilha", 
+            "Crisopídeo", "Pseudomonas", "Phoma", "Antracnose"
+        ];
+
+        const ESTAGIOS_OCORRENCIAS = {
+            "Ferrugem": { label: "Estágio", opcoes: ["Ativa", "Curando", "Curada"] },
+            "Bicho Mineiro": { label: "Fase", opcoes: ["Larva", "Pupa", "Mariposa"] },
+            "Crisopídeo": { label: "Fase", opcoes: ["Ovo", "Adulto"] },
+            "Antracnose": { label: "Parte Afetada", opcoes: ["Fruto", "Folha", "Ramos"] }
+        };
+
+        function verificarEstadoLogin() {
+            const credSalvas = localStorage.getItem('agro_credenciais');
+            const tituloCard = document.getElementById('titulo-login-card');
+            const subtituloCard = document.getElementById('subtitulo-login-card');
+            const btnAcao = document.getElementById('btn-acao-login');
+
+            if (!credSalvas) {
+                tituloCard.innerText = "🛠️ Primeiro Acesso: Criar Credenciais";
+                subtituloCard.innerText = "Defina seu usuário e senha padrão";
+                btnAcao.innerText = "Cadastrar e Entrar";
+            } else {
+                tituloCard.innerText = "🔒 Entrar no Caderneta Agro";
+                subtituloCard.innerText = "Digite seu usuário e senha";
+                btnAcao.innerText = "Entrar";
+            }
+        }
+
+        function fazerLogin() {
+            const user = document.getElementById('login-usuario').value.trim();
+            const pass = document.getElementById('login-senha').value.trim();
+            const credSalvas = localStorage.getItem('agro_credenciais');
+
+            if (!user || !pass) return alert('Preencha o usuário e a senha.');
+
+            if (!credSalvas) {
+                localStorage.setItem('agro_credenciais', JSON.stringify({ usuario: user, senha: pass }));
+                alert('Credenciais cadastradas com sucesso!');
+                document.getElementById('login-usuario').value = '';
+                document.getElementById('login-senha').value = '';
+                carregarTalhoes();
+                mostrarTela('tela-inicio');
+            } else {
+                const cred = JSON.parse(credSalvas);
+                if (user === cred.usuario && pass === cred.senha) {
+                    document.getElementById('login-usuario').value = '';
+                    document.getElementById('login-senha').value = '';
+                    carregarTalhoes();
+                    mostrarTela('tela-inicio');
+                } else {
+                    alert('Usuário ou senha incorretos!');
+                }
+            }
+        }
+
+        function abrirTelaEsqueciSenha() {
+            document.getElementById('recup-palavra').value = '';
+            document.getElementById('recup-nova-senha').value = '';
+            mostrarTela('tela-esqueci-senha');
+        }
+
+        function voltarParaLogin() {
+            verificarEstadoLogin();
+            mostrarTela('tela-login');
+        }
+
+        function salvarNovaSenha() {
+            const palavra = document.getElementById('recup-palavra').value.trim();
+            const novaSenha = document.getElementById('recup-nova-senha').value.trim();
+
+            if (palavra !== "Coelho") {
+                return alert('Palavra-chave incorreta!');
+            }
+
+            if (!novaSenha) {
+                return alert('Digite a nova senha!');
+            }
+
+            const credSalvas = localStorage.getItem('agro_credenciais');
+            if (credSalvas) {
+                let cred = JSON.parse(credSalvas);
+                cred.senha = novaSenha;
+                localStorage.setItem('agro_credenciais', JSON.stringify(cred));
+            } else {
+                localStorage.setItem('agro_credenciais', JSON.stringify({ usuario: "admin", senha: novaSenha }));
+            }
+
+            alert('Senha redefinida com sucesso! Faça login com a nova senha.');
+            voltarParaLogin();
+        }
+
+        function sairDoApp() {
+            verificarEstadoLogin();
+            mostrarTela('tela-login');
+        }
+
+        async function salvarNoLocalStorage() {
+            localStorage.setItem('dadosManejo', JSON.stringify(dadosApp));
+            if (window.db && window.firebaseDoc && window.firebaseSetDoc) {
+                try {
+                    const docRef = window.firebaseDoc(window.db, "caderneta_agro", "dados_gerais");
+                    await window.firebaseSetDoc(docRef, dadosApp);
+                } catch (e) {
+                    console.error("Erro nuvem: ", e);
+                }
+            }
+        }
+
+        async function carregarDadosIniciaisDoApp() {
+            if (window.db && window.firebaseDoc && window.firebaseGetDoc) {
+                try {
+                    const docRef = window.firebaseDoc(window.db, "caderneta_agro", "dados_gerais");
+                    const docSnap = await window.firebaseGetDoc(docRef);
+                    if (docSnap.exists()) {
+                        dadosApp = docSnap.data();
+                        localStorage.setItem('dadosManejo', JSON.stringify(dadosApp));
+                        carregarTalhoes();
+                    }
+                } catch (e) {
+                    console.error("Modo offline: ", e);
+                }
+            }
+        }
+
+        carregarDadosIniciaisDoApp();
+
+        function mostrarTela(idTela) {
+            document.querySelectorAll('.card').forEach(el => el.classList.add('hidden'));
+            const el = document.getElementById(idTela);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function carregarTalhoes() {
+            const container = document.getElementById('lista-talhoes');
+            if(!container) return;
+            container.innerHTML = '';
+            dadosApp.talhoes.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+
+            if (dadosApp.talhoes.length === 0) {
+                container.innerHTML = '<p style="font-size: 14px; color: var(--text-muted);">Nenhum talhão cadastrado.</p>';
+            } else {
+                dadosApp.talhoes.forEach(t => {
+                    const item = document.createElement('div');
+                    item.className = 'talhao-card';
+                    item.innerHTML = `
+                        <div class="talhao-info">
+                            <strong>${t.nome}</strong>
+                            <span class="talhao-detalhes-tag">🌱 ${t.variedade || 'Não informada'} | 📐 ${t.area ? t.area + ' ha' : 'Área N/D'}</span>
+                        </div>
+                        <span style="color: var(--primary); font-weight: bold;">Acessar ➔</span>
+                    `;
+                    item.onclick = () => abrirTalhao(t.id);
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        // --- MÓDULO DE RELATÓRIO E HISTÓRICO DE APLICAÇÕES ---
+        function abrirTelaHistoricoAplicacoes() {
+            if (!dadosApp.operacoes) dadosApp.operacoes = [];
+            
+            const selectFiltro = document.getElementById('filtro-operacao-relatorio');
+            selectFiltro.innerHTML = '<option value="todas">Todas as Operações</option>';
+            dadosApp.operacoes.forEach(op => {
+                selectFiltro.innerHTML += `<option value="${op.id}">${op.nome}</option>`;
+            });
+
+            renderizarRelatorioAplicacoes();
+            mostrarTela('tela-historico-aplicacoes');
+        }
+
+        function calcularMetricasOperacao(op) {
+            let haTotal = 0;
+            let haConcluido = 0;
+
+            if (op.talhoes && Array.isArray(op.talhoes)) {
+                op.talhoes.forEach(tNome => {
+                    const objTalhao = dadosApp.talhoes.find(t => t.nome === tNome);
+                    const areaTalhao = objTalhao ? (parseFloat(objTalhao.area) || 0) : 0;
+                    haTotal += areaTalhao;
+
+                    const detalhes = (op.talhoesDetalhes && op.talhoesDetalhes[tNome]) ? op.talhoesDetalhes[tNome] : {};
+                    haConcluido += (parseFloat(detalhes.qtdHaFeito) || 0);
+                });
+            }
+
+            if (haConcluido > haTotal && haTotal > 0) haConcluido = haTotal;
+
+            const haRestante = Math.max(0, haTotal - haConcluido);
+            const pctConcluido = haTotal > 0 ? ((haConcluido / haTotal) * 100).toFixed(1) : 0;
+            const pctRestante = haTotal > 0 ? ((haRestante / haTotal) * 100).toFixed(1) : 0;
+
+            return { haTotal, haConcluido, haRestante, pctConcluido, pctRestante };
+        }
+
+        function renderizarRelatorioAplicacoes() {
+            const container = document.getElementById('lista-relatorio-aplicacoes');
+            container.innerHTML = '';
+            const filtroId = document.getElementById('filtro-operacao-relatorio').value;
+
+            let opsFiltradas = dadosApp.operacoes;
+            if (filtroId !== 'todas') {
+                opsFiltradas = opsFiltradas.filter(op => op.id === parseInt(filtroId));
+            }
+
+            if (!opsFiltradas || opsFiltradas.length === 0) {
+                container.innerHTML = '<p style="font-size: 14px; color: var(--text-muted);">Nenhuma operação encontrada.</p>';
+                return;
+            }
+
+            opsFiltradas.forEach(op => {
+                const { haTotal, haConcluido, haRestante, pctConcluido, pctRestante } = calcularMetricasOperacao(op);
+                const talhoesStr = (op.talhoes && Array.isArray(op.talhoes)) ? op.talhoes.join(', ') : 'Nenhum talhão';
+                const canvasId = `grafico-pizza-${op.id}`;
+
+                const card = document.createElement('div');
+                card.className = 'talhao-card';
+                card.innerHTML = `
+                    <div class="talhao-info">
+                        <strong>🚜 ${op.nome}</strong>
+                        <span class="talhao-detalhes-tag">
+                            🌱 Talhões: ${talhoesStr}<br>
+                            📅 Início: ${op.dataInicio || 'N/D'} | Fim: ${op.dataFim || 'Em aberto'}<br><br>
+                            📐 <strong>Hectare Total:</strong> ${haTotal.toFixed(1)} ha<br>
+                            ✅ <strong>Hectare Concluído:</strong> ${haConcluido.toFixed(1)} ha (<strong style="color: var(--primary);">${pctConcluido}%</strong>)<br>
+                            ⏳ <strong>Hectare Restante:</strong> ${haRestante.toFixed(1)} ha (<strong style="color: var(--danger);">${pctRestante}%</strong>)
+                        </span>
+                    </div>
+                    <div style="max-width: 220px; margin: 12px auto 0 auto;">
+                        <canvas id="${canvasId}"></canvas>
+                    </div>
+                `;
+                container.appendChild(card);
+
+                setTimeout(() => {
+                    const ctx = document.getElementById(canvasId).getContext('2d');
+                    if (chartRelatorioInstances[op.id]) {
+                        chartRelatorioInstances[op.id].destroy();
+                    }
+                    chartRelatorioInstances[op.id] = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: [`Concluído (${pctConcluido}%)`, `Restante (${pctRestante}%)`],
+                            datasets: [{
+                                data: [haConcluido, haRestante],
+                                backgroundColor: ['#047857', '#dc2626'],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { font: { size: 12, weight: 'bold' } }
+                                }
+                            }
+                        }
+                    });
+                }, 50);
+            });
+        }
+
+        function compartilharRelatorioAplicacoesWhatsApp() {
+            const filtroId = document.getElementById('filtro-operacao-relatorio').value;
+            let opsParaCompartilhar = dadosApp.operacoes;
+            if (filtroId !== 'todas') {
+                opsParaCompartilhar = opsParaCompartilhar.filter(op => op.id === parseInt(filtroId));
+            }
+
+            if (!opsParaCompartilhar || opsParaCompartilhar.length === 0) {
+                return alert('Nenhum dado para compartilhar!');
+            }
+
+            let texto = `📊 *RELATÓRIO DE APLICAÇÕES E PROGRESSO*\n----------------------------------\n`;
+            opsParaCompartilhar.forEach(op => {
+                const { haTotal, haConcluido, haRestante, pctConcluido, pctRestante } = calcularMetricasOperacao(op);
+                texto += `🚜 *${op.nome}*\n`;
+                texto += `• Total: ${haTotal.toFixed(1)} ha\n`;
+                texto += `• Concluído: ${haConcluido.toFixed(1)} ha (${pctConcluido}%)\n`;
+                texto += `• Restante: ${haRestante.toFixed(1)} ha (${pctRestante}%)\n\n`;
+            });
+
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+        }
+
+        // --- MÓDULO DE OPERAÇÕES ---
+        function abrirTelaOperacoes() {
+            if (!dadosApp.operacoes) dadosApp.operacoes = [];
+            renderizarListaOperacoes();
+            mostrarTela('tela-operacoes');
+        }
+
+        function prepararNovaOperacao() {
+            const containerCheckboxes = document.getElementById('container-selecao-talhoes');
+            if(!containerCheckboxes) return;
+            containerCheckboxes.innerHTML = '';
+
+            if (!dadosApp.talhoes || dadosApp.talhoes.length === 0) {
+                alert('Cadastre pelo menos um talhão antes.');
+                return mostrarTela('tela-talhoes');
+            }
+
+            dadosApp.talhoes.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+            dadosApp.talhoes.forEach(t => {
+                containerCheckboxes.innerHTML += `
+                    <label style="display: flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 15px; font-weight: 700; color: var(--text);">
+                        <input type="checkbox" name="talhoes-op" value="${t.nome}" style="width: 22px; height: 22px; accent-color: var(--primary);">
+                        ${t.nome} (${t.variedade || 'Geral'} - ${t.area || 0} ha)
+                    </label>
+                `;
+            });
+
+            document.getElementById('operacao-nome').value = '';
+            document.getElementById('operacao-data-inicio').value = new Date().toISOString().split('T')[0];
+            document.getElementById('operacao-data-fim').value = '';
+            mostrarTela('tela-nova-operacao');
+        }
+
+        function salvarNovaOperacao() {
+            const nomeOperacao = document.getElementById('operacao-nome').value.trim();
+            const dataInicioIso = document.getElementById('operacao-data-inicio').value;
+            const dataFimIso = document.getElementById('operacao-data-fim').value;
+
+            const checkboxes = document.querySelectorAll('input[name="talhoes-op"]:checked');
+            let talhoesSelecionados = [];
+            checkboxes.forEach(cb => talhoesSelecionados.push(cb.value));
+
+            if (!nomeOperacao || talhoesSelecionados.length === 0 || !dataInicioIso) {
+                return alert('Informe o nome, selecione talhões e data inicial!');
+            }
+
+            const pInicio = dataInicioIso.split('-');
+            const dataInicioFormatada = `${pInicio[2]}/${pInicio[1]}/${pInicio[0]}`;
+            let dataFimFormatada = '';
+            if (dataFimIso) {
+                const pFim = dataFimIso.split('-');
+                dataFimFormatada = `${pFim[2]}/${pFim[1]}/${pFim[0]}`;
+            }
+
+            if (!dadosApp.operacoes) dadosApp.operacoes = [];
+
+            let talhoesDetalhesObj = {};
+            talhoesSelecionados.forEach(tNome => {
+                talhoesDetalhesObj[tNome] = {
+                    operador: '',
+                    dataInicioIso: dataInicioIso,
+                    dataInicio: dataInicioFormatada,
+                    dataFimIso: dataFimIso,
+                    dataFim: dataFimFormatada,
+                    historicoHoje: [],
+                    qtdHaFeito: 0,
+                    produtos: []
+                };
+            });
+
+            dadosApp.operacoes.push({
+                id: Date.now(),
+                nome: nomeOperacao,
+                talhoes: talhoesSelecionados,
+                talhoesDetalhes: talhoesDetalhesObj,
+                dataInicio: dataInicioFormatada,
+                dataFim: dataFimFormatada || 'Em aberto'
+            });
+
+            salvarNoLocalStorage();
+            alert('Operação criada com sucesso!');
+            abrirTelaOperacoes();
+        }
+
+        function renderizarListaOperacoes() {
+            const container = document.getElementById('lista-operacoes');
+            if(!container) return;
+            container.innerHTML = '';
+
+            if (!dadosApp.operacoes || dadosApp.operacoes.length === 0) {
+                container.innerHTML = '<p style="font-size: 14px; color: var(--text-muted);">Nenhuma operação registrada.</p>';
+                return;
+            }
+
+            dadosApp.operacoes.forEach(op => {
+                const talhoesStr = (op.talhoes && Array.isArray(op.talhoes)) ? op.talhoes.join(', ') : 'Nenhum talhão';
+
+                const item = document.createElement('div');
+                item.className = 'historico-card';
+                item.innerHTML = `
+                    <div style="flex-grow: 1;" onclick="abrirDetalhesOperacao(${op.id})">
+                        <div style="font-size: 16px; font-weight: 800;">🚜 ${op.nome || 'Operação'}</div>
+                        <div style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-top: 4px;">
+                            🌱 Talhões: <strong>${talhoesStr}</strong><br>
+                            📅 Início: <strong>${op.dataInicio || 'N/D'}</strong> | Fim: <strong>${op.dataFim || 'Em aberto'}</strong>
+                        </div>
+                    </div>
+                    <button class="btn-excluir-visita" onclick="excluirOperacao(${op.id}); event.stopPropagation();">🗑️</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function abrirDetalhesOperacao(id) {
+            operacaoAtualId = id;
+            const op = dadosApp.operacoes.find(o => o.id === id);
+            if (!op) return;
+
+            document.getElementById('detalhe-op-titulo').innerText = `Operação: ${op.nome}`;
+            const containerTalhoes = document.getElementById('lista-talhoes-operacao');
+            containerTalhoes.innerHTML = '';
+
+            if (op.talhoes && Array.isArray(op.talhoes)) {
+                op.talhoes.forEach(tNome => {
+                    const objTalhao = dadosApp.talhoes.find(t => t.nome === tNome);
+                    const areaTotalTalhao = objTalhao ? (parseFloat(objTalhao.area) || 0) : 0;
+                    const detalhes = (op.talhoesDetalhes && op.talhoesDetalhes[tNome]) ? op.talhoesDetalhes[tNome] : {};
+                    const qtdFeito = parseFloat(detalhes.qtdHaFeito) || 0;
+                    
+                    const talhaoConcluido = areaTotalTalhao > 0 && qtdFeito >= areaTotalTalhao;
+                    const badgeStatus = talhaoConcluido ? '<strong style="color: var(--primary);">✅ Finalizado</strong>' : '<strong style="color: var(--warning);">⏳ Em andamento</strong>';
+
+                    const item = document.createElement('div');
+                    item.className = 'talhao-card';
+                    item.innerHTML = `
+                        <div class="talhao-info">
+                            <strong>🌱 ${tNome} ${talhaoConcluido ? '✅' : ''}</strong>
+                            <span class="talhao-detalhes-tag">
+                                Status: ${badgeStatus} | 👤 Operador: ${detalhes.operador || 'Não definido'}<br>
+                                📏 Feito: ${qtdFeito} / ${areaTotalTalhao} ha | 
+                                📦 Produtos: ${(detalhes.produtos || []).length} cadastrados
+                            </span>
+                        </div>
+                        <span style="color: var(--primary); font-weight: bold;">Editar talhão ➔</span>
+                    `;
+                    item.onclick = () => abrirEdicaoTalhaoOperacao(tNome);
+                    containerTalhoes.appendChild(item);
+                });
+            }
+
+            mostrarTela('tela-detalhes-operacao');
+        }
+
+        function marcarOperacaoComoFinalizada() {
+            const op = dadosApp.operacoes.find(o => o.id === operacaoAtualId);
+            if (!op) return;
+
+            let talhoesPendentes = [];
+            if (op.talhoes && Array.isArray(op.talhoes)) {
+                op.talhoes.forEach(tNome => {
+                    const objTalhao = dadosApp.talhoes.find(t => t.nome === tNome);
+                    const areaTotalTalhao = objTalhao ? (parseFloat(objTalhao.area) || 0) : 0;
+                    const detalhes = (op.talhoesDetalhes && op.talhoesDetalhes[tNome]) ? op.talhoesDetalhes[tNome] : {};
+                    const qtdFeito = parseFloat(detalhes.qtdHaFeito) || 0;
+
+                    if (qtdFeito < areaTotalTalhao) {
+                        talhoesPendentes.push(tNome);
+                    }
+                });
+            }
+
+            if (talhoesPendentes.length > 0) {
+                return alert(`Atenção: Os talhões abaixo ainda não completaram 100%: ${talhoesPendentes.join(', ')}.`);
+            }
+
+            const dataHojeIso = new Date().toISOString().split('T')[0];
+            const pFim = dataHojeIso.split('-');
+            const dataHojeFormatada = `${pFim[2]}/${pFim[1]}/${pFim[0]}`;
+
+            op.dataFim = dataHojeFormatada;
+            salvarNoLocalStorage();
+            alert(`Operação marcada como finalizada (${dataHojeFormatada})!`);
+            abrirDetalhesOperacao(operacaoAtualId);
+        }
+
+        function abrirEdicaoTalhaoOperacao(tNome) {
+            talhaoOperacaoEditando = tNome;
+            const op = dadosApp.operacoes.find(o => o.id === operacaoAtualId);
+            const detalhes = (op.talhoesDetalhes && op.talhoesDetalhes[tNome]) ? op.talhoesDetalhes[tNome] : {};
+            const objTalhao = dadosApp.talhoes.find(t => t.nome === tNome);
+            const areaTotalTalhao = objTalhao ? (parseFloat(objTalhao.area) || 0) : 0;
+
+            document.getElementById('edit-talhao-op-titulo').innerText = `Talhão: ${tNome} (${op.nome})`;
+            document.getElementById('talhao-op-operador').value = detalhes.operador || '';
+            document.getElementById('talhao-op-data-inicio').value = detalhes.dataInicioIso || new Date().toISOString().split('T')[0];
+            document.getElementById('talhao-op-data-fim').value = detalhes.dataFimIso || new Date().toISOString().split('T')[0];
+            
+            const haAnterior = detalhes.qtdHaFeito || 0;
+            document.getElementById('lbl-ha-talhao-total').innerText = areaTotalTalhao.toFixed(1);
+            document.getElementById('lbl-ha-anterior').innerText = haAnterior.toFixed(1);
+            document.getElementById('talhao-op-ha-hoje').value = '';
+            document.getElementById('lbl-ha-acumulado').innerText = haAnterior.toFixed(1);
+
+            renderizarLinhasProdutosOperacao(detalhes.produtos || []);
+            calcularTotalProdutosGastos();
+            mostrarTela('tela-edicao-talhao-operacao');
+        }
+
+        function marcarTalhaoComoConcluidoTotal() {
+            const haAnterior = parseFloat(document.getElementById('lbl-ha-anterior').innerText) || 0;
+            const haTotal = parseFloat(document.getElementById('lbl-ha-talhao-total').innerText) || 0;
+            const restante = Math.max(0, haTotal - haAnterior);
+
+            document.getElementById('talhao-op-ha-hoje').value = restante.toFixed(1);
+            calcularTotalProdutosGastos();
+        }
+
+        function voltarParaDetalhesOperacao() {
+            abrirDetalhesOperacao(operacaoAtualId);
+        }
+
+        function renderizarLinhasProdutosOperacao(produtosSalvos) {
+            const container = document.getElementById('container-produtos-operacao');
+            container.innerHTML = '';
+
+            if (!produtosSalvos || produtosSalvos.length === 0) {
+                adicionarLinhaProdutoOperacao();
+                return;
+            }
+
+            produtosSalvos.forEach((p) => {
+                adicionarLinhaProdutoOperacao(p.produtoId, p.doseHa);
+            });
+        }
+
+        function adicionarLinhaProdutoOperacao(produtoSelecionadoId = '', doseSalva = '') {
+            const container = document.getElementById('container-produtos-operacao');
+
+            let opcoesProdutos = '<option value="">Selecione o produto do estoque</option>';
+            if (dadosApp.estoque) {
+                dadosApp.estoque.forEach(e => {
+                    const sel = (produtoSelecionadoId && e.id === parseInt(produtoSelecionadoId)) ? 'selected' : '';
+                    opcoesProdutos += `<option value="${e.id}" ${sel}>${e.nome} (Saldo: ${e.quantidade} ${e.unidade})</option>`;
+                });
+            }
+
+            const div = document.createElement('div');
+            div.className = 'doenca-item';
+            div.style.display = 'grid';
+            div.style.gridTemplateColumns = '2fr 1fr auto';
+            div.style.gap = '10px';
+            div.style.alignItems = 'center';
+            div.innerHTML = `
+                <div>
+                    <label style="margin-top:0;">Produto</label>
+                    <select class="prod-operacao-select" onchange="calcularTotalProdutosGastos()">${opcoesProdutos}</select>
+                </div>
+                <div>
+                    <label style="margin-top:0;">Dose/ha</label>
+                    <input type="number" step="0.01" class="prod-operacao-dose" value="${doseSalva}" placeholder="Ex: 2.5" oninput="calcularTotalProdutosGastos()">
+                </div>
+                <div style="margin-top: 18px;">
+                    <button type="button" class="btn-excluir-visita" onclick="this.parentElement.parentElement.remove(); calcularTotalProdutosGastos();">🗑️</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function calcularTotalProdutosGastos() {
+            const haAnterior = parseFloat(document.getElementById('lbl-ha-anterior').innerText) || 0;
+            const haHoje = parseFloat(document.getElementById('talhao-op-ha-hoje').value) || 0;
+            const haAcumuladoTotal = haAnterior + haHoje;
+
+            document.getElementById('lbl-ha-acumulado').innerText = haAcumuladoTotal.toFixed(1);
+
+            const container = document.getElementById('container-produtos-operacao');
+            const linhas = container.querySelectorAll('.doenca-item');
+            const resumoDiv = document.getElementById('resumo-total-gasto-produtos');
+
+            let htmlResumo = '';
+            if (linhas.length === 0 || haHoje <= 0) {
+                resumoDiv.innerHTML = 'Informe os ha de hoje para calcular a baixa.';
+                return;
+            }
+
+            linhas.forEach(linha => {
+                const selectProd = linha.querySelector('.prod-operacao-select');
+                const inputDose = linha.querySelector('.prod-operacao-dose');
+                const prodId = selectProd.value;
+                const dose = parseFloat(inputDose.value) || 0;
+
+                if (prodId && dose > 0) {
+                    const produtoEstoque = dadosApp.estoque.find(e => e.id === parseInt(prodId));
+                    if (produtoEstoque) {
+                        const totalGastoHoje = haHoje * dose;
+                        htmlResumo += `• <strong>${produtoEstoque.nome}</strong>: ${haHoje} ha × ${dose} = <strong style="color: var(--primary);">${totalGastoHoje.toFixed(2)} ${produtoEstoque.unidade}</strong><br>`;
+                    }
+                }
+            });
+
+            resumoDiv.innerHTML = htmlResumo || 'Selecione produtos e doses.';
+        }
+
+        function salvarEdicaoTalhaoOperacao() {
+            const operador = document.getElementById('talhao-op-operador').value.trim();
+            const dataInicioIso = document.getElementById('talhao-op-data-inicio').value;
+            const dataFimIso = document.getElementById('talhao-op-data-fim').value;
+            const haHoje = parseFloat(document.getElementById('talhao-op-ha-hoje').value) || 0;
+            const haAnterior = parseFloat(document.getElementById('lbl-ha-anterior').innerText) || 0;
+            const haTotalTalhao = parseFloat(document.getElementById('lbl-ha-talhao-total').innerText) || 0;
+            
+            const novoHaAcumulado = parseFloat((haAnterior + haHoje).toFixed(2));
+
+            if (novoHaAcumulado > haTotalTalhao) {
+                return alert(`O acumulado (${novoHaAcumulado} ha) ultrapassa a área total (${haTotalTalhao} ha)!`);
+            }
+
+            if (!operador || !dataInicioIso || !dataFimIso) {
+                return alert('Preencha o operador e as datas!');
+            }
+
+            const pInicio = dataInicioIso.split('-');
+            const dataInicioFmt = `${pInicio[2]}/${pInicio[1]}/${pInicio[0]}`;
+            const pFim = dataFimIso.split('-');
+            const dataFimFmt = `${pFim[2]}/${pFim[1]}/${pFim[0]}`;
+
+            const container = document.getElementById('container-produtos-operacao');
+            const linhas = container.querySelectorAll('.doenca-item');
+            let produtosUtilizados = [];
+
+            let erroEstoque = false;
+            linhas.forEach(linha => {
+                const selectProd = linha.querySelector('.prod-operacao-select');
+                const inputDose = linha.querySelector('.prod-operacao-dose');
+                const prodId = parseInt(selectProd.value);
+                const dose = parseFloat(inputDose.value) || 0;
+
+                if (prodId && dose > 0 && haHoje > 0) {
+                    const totalGastoHoje = parseFloat((haHoje * dose).toFixed(2));
+                    const produtoEstoque = dadosApp.estoque.find(e => e.id === prodId);
+                    
+                    if (produtoEstoque) {
+                        if (totalGastoHoje > produtoEstoque.quantidade) {
+                            alert(`Estoque insuficiente para ${produtoEstoque.nome}. Necessário: ${totalGastoHoje}, Disponível: ${produtoEstoque.quantidade}`);
+                            erroEstoque = true;
+                        }
+                        produtosUtilizados.push({
+                            produtoId: prodId,
+                            produtoName: produtoEstoque.nome,
+                            doseHa: dose,
+                            totalGasto: totalGastoHoje,
+                            unidade: produtoEstoque.unidade
+                        });
+                    }
+                }
+            });
+
+            if (erroEstoque) return;
+
+            const op = dadosApp.operacoes.find(o => o.id === operacaoAtualId);
+            if (!op.talhoesDetalhes) op.talhoesDetalhes = {};
+
+            let detalhesAnteriores = op.talhoesDetalhes[talhaoOperacaoEditando] || { historicoHoje: [] };
+            let historicoHoje = detalhesAnteriores.historicoHoje || [];
+
+            if (haHoje > 0) {
+                historicoHoje.push({
+                    data: new Date().toLocaleDateString('pt-BR'),
+                    haFeitoHoje: haHoje
+                });
+            }
+
+            produtosUtilizados.forEach(pUsado => {
+                const prodEstoque = dadosApp.estoque.find(e => e.id === pUsado.produtoId);
+                if (prodEstoque) {
+                    prodEstoque.quantidade = parseFloat((prodEstoque.quantidade - pUsado.totalGasto).toFixed(2));
+                    
+                    if (!dadosApp.saidasEstoque) dadosApp.saidasEstoque = [];
+                    const talhaoObj = dadosApp.talhoes.find(t => t.nome === talhaoOperacaoEditando);
+
+                    dadosApp.saidasEstoque.push({
+                        id: Date.now() + Math.random(),
+                        produtoId: prodEstoque.id,
+                        produtoNome: prodEstoque.nome,
+                        quantidade: pUsado.totalGasto,
+                        unidade: prodEstoque.unidade,
+                        talhaoId: talhaoObj ? talhaoObj.id : 0,
+                        talhaoNome: talhaoOperacaoEditando,
+                        cultura: talhaoObj ? talhaoObj.variedade : op.nome,
+                        data: new Date().toLocaleDateString('pt-BR')
+                    });
+                }
+            });
+
+            if (dadosApp.estoque) {
+                dadosApp.estoque = dadosApp.estoque.filter(e => e.quantidade > 0);
+            }
+
+            op.talhoesDetalhes[talhaoOperacaoEditando] = {
+                operador,
+                dataInicioIso,
+                dataInicio: dataInicioFmt,
+                dataFimIso,
+                dataFim: dataFimFmt,
+                historicoHoje,
+                qtdHaFeito: novoHaAcumulado,
+                produtos: produtosUtilizados
+            };
+
+            salvarNoLocalStorage();
+            alert('Salvo e estoque atualizado com sucesso!');
+            abrirDetalhesOperacao(operacaoAtualId);
+        }
+
+        function excluirOperacao(id) {
+            if (confirm('Deseja excluir esta operação?')) {
+                dadosApp.operacoes = dadosApp.operacoes.filter(o => o.id !== id);
+                salvarNoLocalStorage();
+                renderizarListaOperacoes();
+            }
+        }
+
+        // --- MÓDULOS DE PEDIDOS, ESTOQUE E MIP ---
+        function abrirTelaPedidos() {
+            if (!dadosApp.pedidos) dadosApp.pedidos = [];
+            document.getElementById('filtro-status-pedido').value = 'todos';
+            renderizarListaPedidos();
+            mostrarTela('tela-pedidos');
+        }
+
+        function prepararNovoPedido() {
+            document.getElementById('pedido-empresa-titulo').value = '';
+            document.getElementById('container-itens-pedido-novo').innerHTML = '';
+            adicionarLinhaItemPedidoNovo();
+            mostrarTela('tela-novo-pedido');
+        }
+
+        function renderizarListaPedidos() {
+            const container = document.getElementById('lista-pedidos');
+            container.innerHTML = '';
+            const filtroStatus = document.getElementById('filtro-status-pedido').value;
+            
+            if (!dadosApp.pedidos) dadosApp.pedidos = [];
+            let pedidosFiltrados = dadosApp.pedidos;
+
+            if (filtroStatus === 'pendentes') {
+                pedidosFiltrados = pedidosFiltrados.filter(p => {
+                    if (!p.itens || !Array.isArray(p.itens)) return false;
+                    let pendenteGeral = false;
+                    p.itens.forEach(item => {
+                        if ((item.quantidadePedida || 0) - (item.totalEntregue || 0) > 0) pendenteGeral = true;
+                    });
+                    return pendenteGeral;
+                });
+            } else if (filtroStatus === 'concluidos') {
+                pedidosFiltrados = pedidosFiltrados.filter(p => {
+                    if (!p.itens || !Array.isArray(p.itens)) return true;
+                    let tudoEntregue = true;
+                    p.itens.forEach(item => {
+                        if ((item.quantidadePedida || 0) - (item.totalEntregue || 0) > 0) tudoEntregue = false;
+                    });
+                    return tudoEntregue;
+                });
+            }
+
+            if (pedidosFiltrados.length === 0) {
+                container.innerHTML = '<p style="font-size: 14px; color: var(--text-muted);">Nenhum pedido encontrado.</p>';
+            } else {
+                pedidosFiltrados.forEach((pedido) => {
+                    let itensHtml = '';
+                    let valorTotalPedido = 0;
+                    const itensArray = Array.isArray(pedido.itens) ? pedido.itens : [];
+
+                    itensArray.forEach((item) => {
+                        const qtdPedida = item.quantidadePedida || 0;
+                        const totalEntregue = item.totalEntregue || 0;
+                        const restante = Math.max(0, qtdPedida - totalEntregue);
+                        const vTotalItem = (item.valorUnitario || 0) * qtdPedida;
+                        valorTotalPedido += vTotalItem;
+
+                        itensHtml += `• ${item.produto}: Pedido: ${qtdPedida} | Entregue: ${totalEntregue} | Restante: <strong style="color: ${restante > 0 ? 'var(--danger)' : 'var(--primary)'};">${restante}</strong> ${item.unidade}<br>`;
+                    });
+
+                    const item = document.createElement('div');
+                    item.className = 'pedido-card';
+                    item.innerHTML = `
+                        <div class="pedido-info">
+                            <strong>🏢 ${pedido.empresa || 'Empresa não informada'}</strong>
+                            <span class="talhao-detalhes-tag" style="margin-top: 6px;">
+                                ${itensHtml || 'Nenhum produto cadastrado.<br>'}
+                                <span style="display: block; margin-top: 6px;">🏷️ <strong>Total Geral: R$ ${valorTotalPedido.toFixed(2)}</strong></span>
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 8px;">
+                            <button class="btn btn-outline" style="margin-top:0; padding: 8px 14px; font-size: 14px; width: auto;" onclick="abrirTelaRegistrarEntrega(${pedido.id}); event.stopPropagation();">+ Registrar Entrega</button>
+                            <button class="btn-excluir-visita" onclick="excluirPedido(${pedido.id}); event.stopPropagation();">🗑️ Excluir</button>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        function adicionarLinhaItemPedidoNovo(produtoVal = '', qtdVal = '', unidadeVal = 'Litros (L)', valorVal = '') {
+            const container = document.getElementById('container-itens-pedido-novo');
+            const div = document.createElement('div');
+            div.className = 'doenca-item';
+            div.style.display = 'grid';
+            div.style.gridTemplateColumns = '2fr 1fr 1fr 1fr auto';
+            div.style.gap = '8px';
+            div.style.alignItems = 'center';
+            div.innerHTML = `
+                <div>
+                    <label style="margin-top:0;">Produto</label>
+                    <input type="text" class="item-pedido-nome" value="${produtoVal}" placeholder="Ex: Fungicida">
+                </div>
+                <div>
+                    <label style="margin-top:0;">Qtd</label>
+                    <input type="number" step="0.1" class="item-pedido-qtd" value="${qtdVal}" placeholder="Ex: 50">
+                </div>
+                <div>
+                    <label style="margin-top:0;">Unidade</label>
+                    <select class="item-pedido-unidade">
+                        <option value="Litros (L)" ${unidadeVal === 'Litros (L)' ? 'selected' : ''}>Litros (L)</option>
+                        <option value="Quilos (kg)" ${unidadeVal === 'Quilos (kg)' ? 'selected' : ''}>Quilos (kg)</option>
+                        <option value="Sacas" ${unidadeVal === 'Sacas' ? 'selected' : ''}>Sacas</option>
+                        <option value="Unidades" ${unidadeVal === 'Unidades' ? 'selected' : ''}>Unidades</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="margin-top:0;">R$ Unit</label>
+                    <input type="number" step="0.01" class="item-pedido-valor" value="${valorVal}" placeholder="Ex: 100">
+                </div>
+                <div style="margin-top: 18px;">
+                    <button type="button" class="btn-excluir-visita" onclick="this.parentElement.parentElement.remove();">🗑️</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function salvarNovoPedidoMultiplo() {
+            const empresa = document.getElementById('pedido-empresa-titulo').value.trim();
+            const container = document.getElementById('container-itens-pedido-novo');
+            const linhas = container.querySelectorAll('.doenca-item');
+
+            if (!empresa) return alert('Informe o nome da empresa fornecedora!');
+
+            let itens = [];
+            linhas.forEach(linha => {
+                const produto = linha.querySelector('.item-pedido-nome').value.trim();
+                const quantidadePedida = parseFloat(linha.querySelector('.item-pedido-qtd').value);
+                const unidade = linha.querySelector('.item-pedido-unidade').value;
+                const valorUnitario = parseFloat(linha.querySelector('.item-pedido-valor').value);
+
+                if (produto && !isNaN(quantidadePedida) && quantidadePedida > 0 && !isNaN(valorUnitario)) {
+                    itens.push({
+                        produto,
+                        quantidadePedida,
+                        totalEntregue: 0,
+                        unidade,
+                        valorUnitario,
+                        entregasHistorico: []
+                    });
+                }
+            });
+
+            if (itens.length === 0) return alert('Adicione pelo menos um produto válido!');
+
+            if (!dadosApp.pedidos) dadosApp.pedidos = [];
+            dadosApp.pedidos.push({ id: Date.now(), empresa, itens });
+            salvarNoLocalStorage();
+
+            document.getElementById('pedido-empresa-titulo').value = '';
+            document.getElementById('container-itens-pedido-novo').innerHTML = '';
+            abrirTelaPedidos();
+        }
+
+        function abrirTelaRegistrarEntrega(id) {
+            pedidoAtualId = id;
+            const pedido = dadosApp.pedidos.find(p => p.id === id);
+            
+            const selectProd = document.getElementById('entrega-produto-select');
+            selectProd.innerHTML = '';
+            
+            const itensArray = Array.isArray(pedido.itens) ? pedido.itens : [];
+            itensArray.forEach((item, index) => {
+                const restante = Math.max(0, item.quantidadePedida - (item.totalEntregue || 0));
+                selectProd.innerHTML += `<option value="${index}">${item.produto} (Restante: ${restante} ${item.unidade})</option>`;
+            });
+
+            document.getElementById('subtitulo-registrar-entrega').innerText = `Empresa: ${pedido.empresa || 'Fornecedor'}`;
+            document.getElementById('entrega-qtd-adicionar').value = '';
+            document.getElementById('entrega-obs').value = '';
+            mostrarTela('tela-registrar-entrega');
+        }
+
+        function salvarEntregaPedido() {
+            const indexItem = parseInt(document.getElementById('entrega-produto-select').value);
+            const qtdAdicionar = parseFloat(document.getElementById('entrega-qtd-adicionar').value);
+            const categoriaInsumo = document.getElementById('entrega-categoria').value;
+            const culturaDestino = document.getElementById('entrega-cultura').value;
+            const obsEntrega = document.getElementById('entrega-obs').value.trim();
+
+            if (isNaN(qtdAdicionar) || qtdAdicionar <= 0) {
+                return alert('Informe uma quantidade válida!');
+            }
+
+            const pedido = dadosApp.pedidos.find(p => p.id === pedidoAtualId);
+            const item = pedido.itens[indexItem];
+            const restante = item.quantidadePedida - (item.totalEntregue || 0);
+
+            if (qtdAdicionar > restante) return alert(`Quantidade excede o saldo restante (${restante}).`);
+
+            item.totalEntregue = parseFloat(((item.totalEntregue || 0) + qtdAdicionar).toFixed(2));
+
+            if (!item.entregasHistorico) item.entregasHistorico = [];
+            item.entregasHistorico.push({
+                quantidade: qtdAdicionar,
+                cultura: culturaDestino,
+                observacao: obsEntrega,
+                data: new Date().toLocaleDateString('pt-BR')
+            });
+
+            if (!dadosApp.estoque) dadosApp.estoque = [];
+            let itemEstoque = dadosApp.estoque.find(e => e.nome.toLowerCase() === item.produto.toLowerCase());
+
+            if (itemEstoque) {
+                itemEstoque.quantidade = parseFloat((itemEstoque.quantidade + qtdAdicionar).toFixed(2));
+            } else {
+                dadosApp.estoque.push({
+                    id: Date.now(),
+                    nome: item.produto,
+                    categoria: categoriaInsumo,
+                    valor: item.valorUnitario || 0,
+                    quantidade: qtdAdicionar,
+                    unidade: item.unidade
+                });
+            }
+
+            salvarNoLocalStorage();
+            alert('Entrega registrada e estoque atualizado!');
+            abrirTelaPedidos();
+        }
+
+        function excluirPedido(id) {
+            if (confirm('Deseja excluir este pedido?')) {
+                dadosApp.pedidos = dadosApp.pedidos.filter(p => p.id !== id);
+                salvarNoLocalStorage();
+                renderizarListaPedidos();
+            }
+        }
+
+        function compartilharResumoPedidos() {
+            let textoMensagem = `🛒 *RELATÓRIO DE PEDIDOS E ENTREGAS*\n----------------------------------\n`;
+            dadosApp.pedidos.forEach(p => {
+                textoMensagem += `🏢 *${p.empresa || 'Empresa'}*\n`;
+                const itensArray = Array.isArray(p.itens) ? p.itens : [];
+                itensArray.forEach(item => {
+                    const restante = Math.max(0, item.quantidadePedida - (item.totalEntregue || 0));
+                    textoMensagem += `• *${item.produto}*: Pedido: ${item.quantidadePedida} | Entregue: ${item.totalEntregue || 0} | Restante: ${restante} ${item.unidade}\n`;
+                    
+                    if (item.entregasHistorico && item.entregasHistorico.length > 0) {
+                        item.entregasHistorico.forEach(e => {
+                            textoMensagem += `  ↳ Entrega: ${e.quantidade} ${item.unidade} (${e.cultura}) em ${e.data}\n`;
+                            if (e.observacao) textoMensagem += `    Obs: ${e.observacao}\n`;
+                        });
+                    }
+                });
+                textoMensagem += `\n`;
+            });
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(textoMensagem)}`, '_blank');
+        }
+
+        function abrirTelaEstoque() {
+            if (!dadosApp.estoque) dadosApp.estoque = [];
+            if (!dadosApp.saidasEstoque) dadosApp.saidasEstoque = [];
+            document.getElementById('filtro-classe-estoque').value = 'todos';
+            renderizarListaEstoque();
+            mostrarTela('tela-estoque');
+        }
+
+        function abrirTelaHistoricoEstoque() {
+            if (!dadosApp.saidasEstoque) dadosApp.saidasEstoque = [];
+            renderizarHistoricoSaidasCompleto();
+            mostrarTela('tela-historico-estoque');
+        }
+
+        function renderizarListaEstoque() {
+            const container = document.getElementById('lista-estoque');
+            container.innerHTML = '';
+            
+            if (dadosApp.estoque) {
+                dadosApp.estoque = dadosApp.estoque.filter(item => item.quantidade > 0);
+            }
+
+            const classeFiltro = document.getElementById('filtro-classe-estoque').value;
+            let itensFiltrados = dadosApp.estoque;
+            if (classeFiltro !== 'todos') itensFiltrados = itensFiltrados.filter(item => item.categoria === classeFiltro);
+
+            if (itensFiltrados.length === 0) {
+                container.innerHTML = '<p style="font-size: 14px; color: var(--text-muted);">Nenhum produto em estoque.</p>';
+            } else {
+                itensFiltrados.forEach(itemEstoque => {
+                    const unitario = itemEstoque.valor || 0;
+                    const qtd = itemEstoque.quantidade || 0;
+                    const item = document.createElement('div');
+                    item.className = 'estoque-card';
+                    item.innerHTML = `
+                        <div class="estoque-info">
+                            <strong>${itemEstoque.nome}</strong>
+                            <span class="talhao-detalhes-tag">📂 ${itemEstoque.categoria} | 💰 R$ ${unitario.toFixed(2)} | 📦 <strong>${qtd} ${itemEstoque.unidade}</strong></span>
+                        </div>
+                        <button class="btn-excluir-visita" onclick="excluirItemEstoque(${itemEstoque.id}); event.stopPropagation();">🗑️</button>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        function compartilharResumoEstoque() {
+            let textoMensagem = `📦 *RESUMO DE ESTOQUE*\n----------------------------------\n`;
+            dadosApp.estoque.forEach(i => {
+                textoMensagem += `• *${i.nome}*: ${i.quantidade} ${i.unidade}\n`;
+            });
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(textoMensagem)}`, '_blank');
+        }
+
+        function renderizarHistoricoSaidasCompleto() {
+            const container = document.getElementById('lista-historico-saidas-completo');
+            container.innerHTML = '';
+            if (dadosApp.saidasEstoque.length === 0) {
+                container.innerHTML = '<p style="font-size: 14px; color: var(--text-muted);">Nenhuma saída registrada.</p>';
+            } else {
+                dadosApp.saidasEstoque.forEach((saida) => {
+                    const item = document.createElement('div');
+                    item.className = 'historico-card';
+                    item.innerHTML = `
+                        <div>
+                            <div style="font-size: 15px; font-weight: 800;">📦 ${saida.produtoNome} (-${saida.quantidade} ${saida.unidade})</div>
+                            <div style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-top: 4px;">🌱 Cultura: ${saida.cultura} | Talhão: ${saida.talhaoNome} (${saida.data})</div>
+                        </div>
+                        <button class="btn-excluir-visita" onclick="excluirSaidaEstoque(${saida.id}); event.stopPropagation();">🗑️</button>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        function salvarNovoItemEstoque() {
+            const nome = document.getElementById('estoque-nome').value.trim();
+            const categoria = document.getElementById('estoque-categoria').value;
+            const valor = parseFloat(document.getElementById('estoque-valor').value);
+            const quantidade = parseFloat(document.getElementById('estoque-qtd').value);
+            const unidade = document.getElementById('estoque-unidade').value;
+
+            if (!nome || isNaN(quantidade) || isNaN(valor)) return alert('Preencha os campos corretamente!');
+
+            if (!dadosApp.estoque) dadosApp.estoque = [];
+            dadosApp.estoque.push({ id: Date.now(), nome, categoria, valor, quantidade, unidade });
+            salvarNoLocalStorage();
+
+            document.getElementById('estoque-nome').value = '';
+            document.getElementById('estoque-valor').value = '';
+            document.getElementById('estoque-qtd').value = '';
+            abrirTelaEstoque();
+        }
+
+        function excluirItemEstoque(id) {
+            if (confirm('Deseja remover este produto?')) {
+                dadosApp.estoque = dadosApp.estoque.filter(item => item.id !== id);
+                salvarNoLocalStorage();
+                renderizarListaEstoque();
+            }
+        }
+
+        function abrirTelaSaidaEstoque() {
+            if (!dadosApp.estoque || dadosApp.estoque.length === 0) return alert('Cadastre produtos no estoque antes!');
+            if (!dadosApp.talhoes || dadosApp.talhoes.length === 0) return alert('Cadastre talhões!');
+
+            const selectProd = document.getElementById('saida-produto-id');
+            selectProd.innerHTML = '';
+            dadosApp.estoque.forEach(p => {
+                selectProd.innerHTML += `<option value="${p.id}">${p.nome} (Saldo: ${p.quantidade} ${p.unidade})</option>`;
+            });
+
+            const selectTalhao = document.getElementById('saida-talhao-id');
+            selectTalhao.innerHTML = '';
+            dadosApp.talhoes.forEach(t => {
+                selectTalhao.innerHTML += `<option value="${t.id}">${t.nome}</option>`;
+            });
+
+            document.getElementById('saida-qtd').value = '';
+            mostrarTela('tela-saida-estoque');
+        }
+
+        function salvarSaidaEstoque() {
+            const produtoId = parseInt(document.getElementById('saida-produto-id').value);
+            const qtdSaida = parseFloat(document.getElementById('saida-qtd').value);
+            const cultura = document.getElementById('saida-cultura').value;
+            const talhaoId = parseInt(document.getElementById('saida-talhao-id').value);
+
+            if (isNaN(qtdSaida) || qtdSaida <= 0) return alert('Informe quantidade válida!');
+
+            const produto = dadosApp.estoque.find(p => p.id === produtoId);
+            const talhao = dadosApp.talhoes.find(t => t.id === talhaoId);
+
+            if (qtdSaida > produto.quantidade) return alert(`Saldo insuficiente! Disponível: ${produto.quantidade}.`);
+
+            produto.quantidade = parseFloat((produto.quantidade - qtdSaida).toFixed(2));
+            
+            if (dadosApp.estoque) {
+                dadosApp.estoque = dadosApp.estoque.filter(e => e.quantidade > 0);
+            }
+
+            if (!dadosApp.saidasEstoque) dadosApp.saidasEstoque = [];
+
+            dadosApp.saidasEstoque.push({
+                id: Date.now(),
+                produtoId: produto.id,
+                produtoNome: produto.nome,
+                quantidade: qtdSaida,
+                unidade: produto.unidade,
+                talhaoId: talhao.id,
+                talhaoNome: talhao.nome,
+                cultura,
+                data: new Date().toLocaleDateString('pt-BR')
+            });
+
+            salvarNoLocalStorage();
+            alert('Baixa efetuada com sucesso!');
+            abrirTelaEstoque();
+        }
+
+        function excluirSaidaEstoque(saidaId) {
+            if (confirm('Deseja excluir este registro?')) {
+                dadosApp.saidasEstoque = dadosApp.saidasEstoque.filter(s => s.id !== saidaId);
+                salvarNoLocalStorage();
+                renderizarHistoricoSaidasCompleto();
+            }
+        }
+
+        function renderizarListaDoencas() {
+            const container = document.getElementById('container-lista-doencas');
+            container.innerHTML = '';
+
+            LISTA_OCORRENCIAS.forEach((doenca, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'doenca-item';
+                const temEstagio = ESTAGIOS_OCORRENCIAS[doenca];
+                let estagioHtml = '';
+
+                if (temEstagio) {
+                    const configEstagio = ESTAGIOS_OCORRENCIAS[doenca];
+                    let opcoesHtml = configEstagio.opcoes.map(op => `<option value="${op}">${op}</option>`).join('');
+                    estagioHtml = `<div><label style="margin-top: 0;">${configEstagio.label}</label><select id="estagio-doenca-${index}">${opcoesHtml}</select></div>`;
+                }
+
+                itemDiv.innerHTML = `
+                    <label class="doenca-checkbox-label">
+                        <input type="checkbox" id="check-doenca-${index}" value="${doenca}" onchange="toggleDetalhesDoenca(${index})">
+                        ${doenca}
+                    </label>
+                    <div id="detalhes-doenca-${index}" class="doenca-detalhes hidden">
+                        ${estagioHtml}
+                        <div style="${!temEstagio ? 'grid-column: span 2;' : ''}">
+                            <label style="margin-top: 0;">Severidade</label>
+                            <select id="severidade-doenca-${index}">
+                                <option value="Baixa">Baixa</option>
+                                <option value="Média">Média</option>
+                                <option value="Alta">Alta</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function toggleDetalhesDoenca(index) {
+            const check = document.getElementById(`check-doenca-${index}`);
+            const detalhes = document.getElementById(`detalhes-doenca-${index}`);
+            if (check.checked) detalhes.classList.remove('hidden');
+            else detalhes.classList.add('hidden');
+        }
+
+        function abrirResumoGeral() {
+            dadosApp.talhoes.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+            const selectTalhao = document.getElementById('filtro-talhao');
+            selectTalhao.innerHTML = '<option value="todos">Todos os Talhões</option>';
+            dadosApp.talhoes.forEach(t => {
+                selectTalhao.innerHTML += `<option value="${t.id}">${t.nome}</option>`;
+            });
+            document.getElementById('filtro-data-inicio').value = '';
+            document.getElementById('filtro-data-fim').value = '';
+            document.getElementById('filtro-porcentagem').value = '0';
+            aplicarFiltrosResumo();
+            mostrarTela('tela-resumo-geral');
+        }
+
+        const LISTA_OCORRENCIAS_DETALHADAS = [
+            "Ferrugem (Ativa)", "Ferrugem (Curando)", "Ferrugem (Curada)",
+            "Bicho Mineiro (Larva)", "Bicho Mineiro (Pupa)", "Bicho Mineiro (Mariposa)",
+            "Cercospora", "Mancha Aureolada", "Ácaro Vermelho", "Ácaro Leprose",
+            "Pulgão", "Ascochita", "Cochonilha", "Crisopídeo", "Pseudomonas", "Phoma", "Antracnose"
+        ];
+
+        function aplicarFiltrosResumo() {
+            const talhaoFiltro = document.getElementById('filtro-talhao').value;
+            const doencaFiltro = document.getElementById('filtro-doenca').value;
+            const dataInicioFiltro = document.getElementById('filtro-data-inicio').value;
+            const dataFimFiltro = document.getElementById('filtro-data-fim').value;
+            const minPorcentagem = parseFloat(document.getElementById('filtro-porcentagem').value) || 0;
+
+            const thead = document.getElementById('cabecalho-tabela-resumo');
+            const tbody = document.getElementById('corpo-tabela-resumo');
+
+            if (doencaFiltro === 'todas') {
+                let ths = `<tr><th>Talhão</th><th>Área (ha)</th><th>Última Visita</th><th>Saudáveis</th>`;
+                LISTA_OCORRENCIAS_DETALHADAS.forEach(d => { ths += `<th>${d}</th>`; });
+                ths += `</tr>`;
+                thead.innerHTML = ths;
+            } else {
+                thead.innerHTML = `<tr><th>Talhão</th><th>Área (ha)</th><th>Última Visita</th><th>Saudáveis</th><th>${doencaFiltro}</th></tr>`;
+            }
+
+            tbody.innerHTML = '';
+            let talhoesFiltrados = dadosApp.talhoes;
+            if (talhaoFiltro !== 'todos') talhoesFiltrados = talhoesFiltrados.filter(t => t.id === parseInt(talhaoFiltro));
+
+            let somaAreaHa = 0;
+
+            talhoesFiltrados.forEach(t => {
+                let visitas = dadosApp.visitas.filter(v => v.talhaoId === t.id);
+
+                if (dataInicioFiltro) {
+                    visitas = visitas.filter(v => {
+                        const partes = v.data.split('/');
+                        const vIso = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                        return vIso >= dataInicioFiltro;
+                    });
+                }
+                if (dataFimFiltro) {
+                    visitas = visitas.filter(v => {
+                        const partes = v.data.split('/');
+                        const vIso = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                        return vIso <= dataFimFiltro;
+                    });
+                }
+
+                const ultimaVisita = visitas.length > 0 ? visitas[visitas.length - 1] : null;
+                const areaDoTalhao = parseFloat(t.area) || 0;
+
+                let dataVisita = "Sem registros";
+                let pctSaudavel = "0.0%";
+                let contagemDoencas = {};
+                LISTA_OCORRENCIAS_DETALHADAS.forEach(d => { contagemDoencas[d] = 0; });
+                let totalPlantas = 0;
+
+                if (ultimaVisita) {
+                    dataVisita = ultimaVisita.data;
+                    totalPlantas = ultimaVisita.plantas.length;
+                    let saudaveis = 0;
+
+                    ultimaVisita.plantas.forEach(p => {
+                        if (p.status === 'saudavel') saudaveis++;
+                        else if (p.status === 'doenca' && p.doencas) {
+                            p.doencas.forEach(dObj => {
+                                let chaveNome = dObj.nome;
+                                if (dObj.nome === 'Ferrugem' && dObj.estagio) {
+                                    chaveNome = `Ferrugem (${dObj.estagio})`;
+                                } else if (dObj.nome === 'Bicho Mineiro' && dObj.estagio) {
+                                    chaveNome = `Bicho Mineiro (${dObj.estagio})`;
+                                } else if (dObj.nome === 'Ácaro Vermelho ou Leprose') {
+                                    chaveNome = 'Ácaro Vermelho'; 
+                                }
+                                if (contagemDoencas[chaveNome] !== undefined) {
+                                    contagemDoencas[chaveNome]++;
+                                } else if (contagemDoencas[dObj.nome] !== undefined) {
+                                    contagemDoencas[dObj.nome]++;
+                                }
+                            });
+                        }
+                    });
+                    pctSaudavel = ((saudaveis / totalPlantas) * 100).toFixed(1) + "%";
+                }
+
+                function formatarPct(qtd) {
+                    if (!ultimaVisita || totalPlantas === 0) return '<span class="badge-zero">0.0%</span>';
+                    const pct = ((qtd / totalPlantas) * 100).toFixed(1);
+                    const numPct = parseFloat(pct);
+                    if (numPct < minPorcentagem) return '<span class="badge-zero">0.0%</span>';
+                    return numPct > 0 ? `<span class="badge-alerta">${pct}%</span>` : `<span class="badge-zero">0.0%</span>`;
+                }
+
+                if (minPorcentagem > 0 && doencaFiltro !== 'todas') {
+                    const qtdOcorr = contagemDoencas[doencaFiltro] || 0;
+                    const pctOcorr = totalPlantas > 0 ? (qtdOcorr / totalPlantas) * 100 : 0;
+                    if (pctOcorr < minPorcentagem) return; 
+                }
+
+                somaAreaHa += areaDoTalhao;
+
+                const tr = document.createElement('tr');
+                if (doencaFiltro === 'todas') {
+                    let tds = `<td><strong>${t.nome}</strong></td><td>${areaDoTalhao.toFixed(1)} ha</td><td>${dataVisita}</td><td style="color: var(--primary); font-weight: 800;">${ultimaVisita ? pctSaudavel : '-'}</td>`;
+                    LISTA_OCORRENCIAS_DETALHADAS.forEach(d => { tds += `<td>${formatarPct(contagemDoencas[d])}</td>`; });
+                    tr.innerHTML = tds;
+                } else {
+                    tr.innerHTML = `<td><strong>${t.nome}</strong></td><td>${areaDoTalhao.toFixed(1)} ha</td><td>${dataVisita}</td><td style="color: var(--primary); font-weight: 800;">${ultimaVisita ? pctSaudavel : '-'}</td><td>${formatarPct(contagemDoencas[doencaFiltro] || 0)}</td>`;
+                }
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('total-area-filtrada').innerText = `${somaAreaHa.toFixed(1)} ha`;
+        }
+
+        function limparFiltrosResumo() {
+            document.getElementById('filtro-talhao').value = 'todos';
+            document.getElementById('filtro-doenca').value = 'todas';
+            document.getElementById('filtro-data-inicio').value = '';
+            document.getElementById('filtro-data-fim').value = '';
+            document.getElementById('filtro-porcentagem').value = '0';
+            aplicarFiltrosResumo();
+        }
+
+        function compartilharResumoMIPWhatsApp() {
+            const doencaFiltro = document.getElementById('filtro-doenca').value;
+            const minPorcentagem = document.getElementById('filtro-porcentagem').value;
+            const areaTotal = document.getElementById('total-area-filtrada').innerText;
+
+            let texto = `📊 *RESUMO GERAL MIP - CADERNETA AGRO*\n`;
+            texto += `----------------------------------\n`;
+            texto += `📐 *Área Total Filtrada:* ${areaTotal}\n`;
+            texto += `🔍 *Filtro Ocorrência:* ${doencaFiltro}\n`;
+            texto += `📈 *Mínimo Porcentagem:* ${minPorcentagem}%\n\n`;
+
+            const linhas = document.querySelectorAll('#corpo-tabela-resumo tr');
+            if (linhas.length === 0) {
+                texto += `_Nenhum talhão encontrado._`;
+            } else {
+                linhas.forEach(tr => {
+                    const cols = tr.querySelectorAll('td');
+                    if (cols.length >= 4) {
+                        texto += `🌱 *${cols[0].innerText}* (${cols[1].innerText}) | Visita: ${cols[2].innerText} | Saudáveis: ${cols[3].innerText}\n`;
+                    }
+                });
+            }
+
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
+        }
+
+        function salvarNovoTalhao() {
+            const nome = document.getElementById('novo-talhao-nome').value.trim();
+            const variedade = document.getElementById('novo-talhao-variedade').value.trim();
+            const area = parseFloat(document.getElementById('novo-talhao-area').value);
+
+            if (!nome || !variedade || isNaN(area)) return alert('Preencha todos os campos!');
+
+            dadosApp.talhoes.push({ id: Date.now(), nome, variedade, area });
+            salvarNoLocalStorage();
+
+            document.getElementById('novo-talhao-nome').value = '';
+            document.getElementById('novo-talhao-variedade').value = '';
+            document.getElementById('novo-talhao-area').value = '';
+            carregarTalhoes();
+            mostrarTela('tela-talhoes');
+        }
+
+        function abrirTalhao(id) {
+            talhaoAtualId = id;
+            const talhao = dadosApp.talhoes.find(t => t.id === id);
+            document.getElementById('titulo-talhao').innerText = talhao.nome;
+            document.getElementById('subtitulo-talhao').innerText = `Variedade: ${talhao.variedade} • Área: ${talhao.area} ha`;
+            
+            const containerRascunho = document.getElementById('container-botao-continuar-rascunho');
+            containerRascunho.innerHTML = '';
+            
+            if (dadosApp.rascunhosMIP && dadosApp.rascunhosMIP[talhaoAtualId]) {
+                const rascunho = dadosApp.rascunhosMIP[talhaoAtualId];
+                containerRascunho.innerHTML = `
+                    <div style="background: #fef3c7; border: 2px solid #f59e0b; padding: 14px; border-radius: var(--radius-sm); margin-bottom: 16px;">
+                        <strong style="color: #b45309; font-size: 15px;">⚠️ Vistoria em Andamento</strong>
+                        <p style="font-size: 13px; font-weight: 600; color: var(--text); margin-top: 4px;">${rascunho.plantas.length} de ${rascunho.totalMeta} plantas avaliadas.</p>
+                        <button onclick="continuarRascunhoMIP()" class="btn btn-warning" style="margin-top: 10px;">▶️ Continuar Vistoria</button>
+                    </div>
+                `;
+            }
+
+            carregarHistoricoVisitas(id);
+            mostrarTela('tela-detalhes');
+        }
+
+        function carregarHistoricoVisitas(talhaoId) {
+            const divHistorico = document.getElementById('historico-visitas');
+            divHistorico.innerHTML = '';
+            const visitasTalhao = dadosApp.visitas.filter(v => v.talhaoId === talhaoId);
+            
+            if(visitasTalhao.length === 0) {
+                divHistorico.innerHTML = '<p style="font-size: 14px; color: var(--text-muted);">Nenhuma vistoria realizada.</p>';
+            } else {
+                visitasTalhao.forEach((v, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'historico-card';
+                    item.innerHTML = `
+                        <div style="flex-grow: 1;" onclick="abrirDetalhesVisita(${v.id})">
+                            <div style="font-size: 15px; font-weight: 800;">Visita #${index + 1} — ${v.data}</div>
+                            <div style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-top: 4px;">${v.resumo.totalAvaliadas} plantas | ${v.resumo.porcentagemAfetadas}% afetadas</div>
+                        </div>
+                        <button class="btn-excluir-visita" onclick="excluirVisita(${v.id}); event.stopPropagation();">🗑️</button>
+                    `;
+                    divHistorico.appendChild(item);
+                });
+            }
+        }
+
+        function abrirDetalhesVisita(visitaId) {
+            const visita = dadosApp.visitas.find(v => v.id === visitaId);
+            if (!visita) return;
+
+            document.getElementById('detalhe-visita-titulo').innerText = `Visita de ${visita.data}`;
+            document.getElementById('detalhe-visita-subtitulo').innerText = `Total: ${visita.resumo.totalAvaliadas} | Afetadas: ${visita.resumo.porcentagemAfetadas}%`;
+
+            const listaPlantasDiv = document.getElementById('lista-plantas-visita');
+            listaPlantasDiv.innerHTML = '';
+
+            visita.plantas.forEach(p => {
+                let descStatus = p.status === 'saudavel' ? '✅ Saudável' : '🦠 Afetada';
+                const plantaCard = document.createElement('div');
+                plantaCard.className = 'talhao-card';
+                plantaCard.innerHTML = `<div class="talhao-info"><strong>Planta #${p.numero} - ${descStatus}</strong></div>`;
+                listaPlantasDiv.appendChild(plantaCard);
+            });
+
+            mostrarTela('tela-detalhe-visita');
+            renderizarMapaVisitaDetalhe(visita.plantas);
+        }
+
+        function renderizarMapaVisitaDetalhe(plantas) {
+            if (mapDetalheVisitaInstance) {
+                mapDetalheVisitaInstance.remove();
+                mapDetalheVisitaInstance = null;
+            }
+            
+            const primeiraComGps = plantas.find(p => p.gps !== null);
+            const centro = primeiraComGps ? [primeiraComGps.gps.lat, primeiraComGps.gps.lng] : [-21.2, -45.4];
+
+            mapDetalheVisitaInstance = L.map('mapa-detalhe-visita', { center: centro, zoom: 15, layers: [camadaRuas] });
+            L.control.layers({ "Mapa Padrão": camadaRuas, "Satélite": camadaSatelite }).addTo(mapDetalheVisitaInstance);
+
+            plantas.forEach(p => {
+                if (p.gps) {
+                    const cor = p.status === 'saudavel' ? '#047857' : '#dc2626';
+                    L.circleMarker([p.gps.lat, p.gps.lng], { color: cor, fillColor: cor, fillOpacity: 0.9, radius: 9 }).addTo(mapDetalheVisitaInstance);
+                }
+            });
+
+            setTimeout(() => { if(mapDetalheVisitaInstance) mapDetalheVisitaInstance.invalidateSize(); }, 100);
+        }
+
+        function voltarParaTalhaoDetalhes() { abrirTalhao(talhaoAtualId); }
+
+        function excluirVisita(visitaId) {
+            if (confirm('Deseja excluir esta visita?')) {
+                dadosApp.visitas = dadosApp.visitas.filter(v => v.id !== visitaId);
+                salvarNoLocalStorage();
+                carregarHistoricoVisitas(talhaoAtualId);
+            }
+        }
+
+        function excluirTalhaoAtual() {
+            const talhao = dadosApp.talhoes.find(t => t.id === talhaoAtualId);
+            if (confirm(`Deseja excluir "${talhao.nome}"?`)) {
+                dadosApp.talhoes = dadosApp.talhoes.filter(t => t.id !== talhaoAtualId);
+                dadosApp.visitas = dadosApp.visitas.filter(v => v.talhaoId !== talhaoAtualId);
+                if (dadosApp.rascunhosMIP) delete dadosApp.rascunhosMIP[talhaoAtualId];
+                salvarNoLocalStorage();
+                carregarTalhoes();
+                mostrarTela('tela-talhoes');
+            }
+        }
+
+        function iniciarNovaAvaliacao() { 
+            if (dadosApp.rascunhosMIP && dadosApp.rascunhosMIP[talhaoAtualId]) {
+                if (!confirm('Deseja iniciar um novo rascunho do zero?')) return;
+                delete dadosApp.rascunhosMIP[talhaoAtualId];
+                salvarNoLocalStorage();
+            }
+            mostrarTela('tela-config-avaliacao'); 
+        }
+
+        function comecarVistoria() {
+            const meta = parseInt(document.getElementById('qtd-plantas-meta').value);
+            if (!meta || meta < 1) return alert('Insira uma quantidade válida!');
+            avaliacaoAtual = { totalMeta: meta, plantas: [], plantaIndex: 1 };
+            renderizarListaDoencas();
+            carregarFormularioPlanta();
+            mostrarTela('tela-vistoria');
+        }
+
+        function continuarRascunhoMIP() {
+            if (!dadosApp.rascunhosMIP || !dadosApp.rascunhosMIP[talhaoAtualId]) return;
+            const rascunho = dadosApp.rascunhosMIP[talhaoAtualId];
+            avaliacaoAtual = { totalMeta: rascunho.totalMeta, plantas: rascunho.plantas, plantaIndex: rascunho.plantas.length + 1 };
+            renderizarListaDoencas();
+            carregarFormularioPlanta();
+            mostrarTela('tela-vistoria');
+        }
+
+        function salvarRascunhoMIP() {
+            if (!dadosApp.rascunhosMIP) dadosApp.rascunhosMIP = {};
+            dadosApp.rascunhosMIP[talhaoAtualId] = { totalMeta: avaliacaoAtual.totalMeta, plantas: avaliacaoAtual.plantas };
+            salvarNoLocalStorage();
+            alert('Rascunho salvo!');
+            abrirTalhao(talhaoAtualId);
+        }
+
+        function carregarFormularioPlanta() {
+            document.getElementById('progresso-planta').innerText = `Planta ${avaliacaoAtual.plantaIndex} de ${avaliacaoAtual.totalMeta}`;
+            selecionarStatus('saudavel');
+            document.getElementById('input-obs').value = '';
+            document.getElementById('input-foto').value = '';
+            document.getElementById('status-gps').innerText = '';
+            gpsAtual = null;
+
+            LISTA_OCORRENCIAS.forEach((_, index) => {
+                const check = document.getElementById(`check-doenca-${index}`);
+                if (check) check.checked = false;
+                const detalhes = document.getElementById(`detalhes-doenca-${index}`);
+                if (detalhes) detalhes.classList.add('hidden');
+            });
+        }
+
+        function selecionarStatus(status) {
+            statusPlantaAtual = status;
+            if(status === 'saudavel') {
+                document.getElementById('btn-saudavel').classList.add('ativo');
+                document.getElementById('btn-doenca').classList.remove('ativo');
+                document.getElementById('secao-doenca').classList.add('hidden');
+            } else {
+                document.getElementById('btn-doenca').classList.add('ativo');
+                document.getElementById('btn-saudavel').classList.remove('ativo');
+                document.getElementById('secao-doenca').classList.remove('hidden');
+            }
+        }
+
+        function capturarGps() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    gpsAtual = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    document.getElementById('status-gps').innerText = `📍 Lat: ${gpsAtual.lat.toFixed(4)}, Lng: ${gpsAtual.lng.toFixed(4)}`;
+                }, () => alert('Erro ao obter localização.'));
+            } else { alert('GPS não suportado.'); }
+        }
+
+        function salvarPlantaEAvancar() {
+            let listaDoencasSelecionadas = [];
+            if (statusPlantaAtual === 'doenca') {
+                LISTA_OCORRENCIAS.forEach((doenca, index) => {
+                    const check = document.getElementById(`check-doenca-${index}`);
+                    if (check && check.checked) {
+                        const estagioElem = document.getElementById(`estagio-doenca-${index}`);
+                        const severidadeElem = document.getElementById(`severidade-doenca-${index}`);
+                        listaDoencasSelecionadas.push({ nome: doenca, estagio: estagioElem ? estagioElem.value : null, severidade: severidadeElem ? severidadeElem.value : 'Baixa' });
+                    }
+                });
+                if (listaDoencasSelecionadas.length === 0) return alert('Selecione pelo menos uma ocorrência.');
+            }
+
+            avaliacaoAtual.plantas.push({
+                numero: avaliacaoAtual.plantaIndex,
+                status: statusPlantaAtual,
+                doencas: listaDoencasSelecionadas,
+                gps: gpsAtual,
+                obs: document.getElementById('input-obs').value.trim()
+            });
+
+            if (!dadosApp.rascunhosMIP) dadosApp.rascunhosMIP = {};
+            dadosApp.rascunhosMIP[talhaoAtualId] = { totalMeta: avaliacaoAtual.totalMeta, plantas: avaliacaoAtual.plantas };
+            salvarNoLocalStorage();
+
+            if (avaliacaoAtual.plantaIndex < avaliacaoAtual.totalMeta) {
+                avaliacaoAtual.plantaIndex++;
+                carregarFormularioPlanta();
+            } else {
+                processarResultadoVistoria();
+            }
+        }
+
+        function processarResultadoVistoria() {
+            const totalAvaliadas = avaliacaoAtual.plantas.length;
+            const afetadas = avaliacaoAtual.plantas.filter(p => p.status === 'doenca').length;
+            const pctAfetadas = ((afetadas / totalAvaliadas) * 100).toFixed(1);
+
+            let contagemOcorrencias = {};
+            avaliacaoAtual.plantas.forEach(p => {
+                if (p.status === 'doenca' && p.doencas) {
+                    p.doencas.forEach(d => { contagemOcorrencias[d.nome] = (contagemOcorrencias[d.nome] || 0) + 1; });
+                }
+            });
+
+            document.getElementById('resumo-estatisticas').innerHTML = `<div>📊 Total: <strong>${totalAvaliadas}</strong></div><div>🦠 Afetadas: <strong style="color: var(--danger);">${afetadas} (${pctAfetadas}%)</strong></div>`;
+            mostrarTela('tela-resultado');
+
+            setTimeout(() => {
+                const ctx = document.getElementById('grafico-resultado').getContext('2d');
+                if (chartInstance) chartInstance.destroy();
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(contagemOcorrencias).length > 0 ? Object.keys(contagemOcorrencias) : ['Nenhuma'],
+                        datasets: [{ label: 'Ocorrências', data: Object.values(contagemOcorrencias).length > 0 ? Object.values(contagemOcorrencias) : [0], backgroundColor: '#047857' }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+                if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+
+                const primeiraComGps = avaliacaoAtual.plantas.find(p => p.gps !== null);
+                const centro = primeiraComGps ? [primeiraComGps.gps.lat, primeiraComGps.gps.lng] : [-21.2, -45.4];
+                
+                mapInstance = L.map('mapa', { center: centro, zoom: 15, layers: [camadaRuas] });
+                L.control.layers({ "Mapa Padrão": camadaRuas, "Satélite": camadaSatelite }).addTo(mapInstance);
+
+                avaliacaoAtual.plantas.forEach(p => {
+                    if (p.gps) {
+                        const cor = p.status === 'saudavel' ? '#047857' : '#dc2626';
+                        L.circleMarker([p.gps.lat, p.gps.lng], { color: cor, fillColor: cor, fillOpacity: 0.9, radius: 9 }).addTo(mapInstance);
+                    }
+                });
+
+                if(mapInstance) mapInstance.invalidateSize();
+            }, 100);
+        }
+
+        function finalizarESalvarVisita() {
+            const totalAvaliadas = avaliacaoAtual.plantas.length;
+            const afetadas = avaliacaoAtual.plantas.filter(p => p.status === 'doenca').length;
+            
+            dadosApp.visitas.push({
+                id: Date.now(),
+                talhaoId: talhaoAtualId,
+                data: new Date().toLocaleDateString('pt-BR'),
+                resumo: { totalAvaliadas, totalAfetadas: afetadas, porcentagemAfetadas: parseFloat(((afetadas / totalAvaliadas) * 100).toFixed(1)) },
+                plantas: avaliacaoAtual.plantas
+            });
+
+            if (dadosApp.rascunhosMIP && dadosApp.rascunhosMIP[talhaoAtualId]) delete dadosApp.rascunhosMIP[talhaoAtualId];
+            salvarNoLocalStorage();
+            alert('Visita salva com sucesso!');
+            abrirTalhao(talhaoAtualId);
+        }
+
+        async function atualizarDadosDaNuvem() {
+            if (window.db && window.firebaseDoc && window.firebaseGetDoc) {
+                try {
+                    const docRef = window.firebaseDoc(window.db, "caderneta_agro", "dados_gerais");
+                    const docSnap = await window.firebaseGetDoc(docRef);
+                    if (docSnap.exists()) {
+                        dadosApp = docSnap.data();
+                        localStorage.setItem('dadosManejo', JSON.stringify(dadosApp));
+                        carregarTalhoes();
+                        alert("Dados atualizados!");
+                    } else { alert("Nenhum dado na nuvem."); }
+                } catch (e) { alert("Erro: " + e.message); }
+            } else { alert("Firebase indisponível."); }
+        }
+
+        verificarEstadoLogin();
+        mostrarTela('tela-login');
+    </script>
+</body>
+</html>
